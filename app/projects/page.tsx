@@ -38,7 +38,7 @@ export default function ProjectsPage() {
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="max-w-3xl">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-semibold">{project.companyName}</h2>
+                    <h2 className="text-2xl font-semibold">{project.siteProfile.companyName}</h2>
                     <StatusBadge status={project.status} />
                   </div>
 

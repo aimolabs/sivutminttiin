@@ -16,7 +16,7 @@ export function ProjectSummaryCard({ project }: ProjectSummaryCardProps) {
           <p className="text-xs uppercase tracking-[0.2em] text-white/45">
             Company
           </p>
-          <p className="mt-2 text-lg font-semibold">{project.companyName}</p>
+          <p className="mt-2 text-lg font-semibold">{project.siteProfile.companyName}</p>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-black/10 p-4">

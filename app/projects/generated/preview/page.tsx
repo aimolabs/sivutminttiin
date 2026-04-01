@@ -28,7 +28,7 @@ export default async function GeneratedPreviewPage({
               <p className="text-xs uppercase tracking-[0.24em] text-sky-300/80">
                 Client concept preview
               </p>
-              <h1 className="mt-1 text-lg font-semibold">{project.companyName}</h1>
+              <h1 className="mt-1 text-lg font-semibold">{project.siteProfile.companyName}</h1>
             </div>
 
             <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/75">
@@ -41,7 +41,7 @@ export default async function GeneratedPreviewPage({
               <p className="text-xs uppercase tracking-[0.2em] text-white/45">
                 Prepared for
               </p>
-              <p className="mt-2 text-2xl font-semibold">{project.companyName}</p>
+              <p className="mt-2 text-2xl font-semibold">{project.siteProfile.companyName}</p>
               <p className="mt-4 text-sm leading-6 text-white/70">
                 Tämä konsepti on rakennettu URL:n perusteella demoksi siitä, miltä
                 yrityksen etusivu voisi näyttää selkeämpänä, uskottavampana ja

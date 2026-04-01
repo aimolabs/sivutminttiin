@@ -37,7 +37,7 @@ export default async function GeneratedProjectPage({
 
               <div className="mt-3 flex items-center gap-3">
                 <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
-                  {project.companyName}
+                  {project.siteProfile.companyName}
                 </h1>
                 <StatusBadge status={project.status} />
               </div>

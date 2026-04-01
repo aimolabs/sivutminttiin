@@ -24,7 +24,7 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
             <p className="text-xs uppercase tracking-[0.24em] text-sky-300/80">
               Concept preview
             </p>
-            <h1 className="mt-1 text-lg font-semibold">{project.companyName}</h1>
+            <h1 className="mt-1 text-lg font-semibold">{project.siteProfile.companyName}</h1>
           </div>
 
           <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/75">
