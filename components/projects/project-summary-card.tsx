@@ -1,47 +1,19 @@
 import { Project } from "@/lib/mock/projects";
 
-type ProjectSummaryCardProps = {
+type Props = {
   project: Project;
 };
 
-export function ProjectSummaryCard({ project }: ProjectSummaryCardProps) {
+export function ProjectSummaryCard({ project }: Props) {
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
-      <p className="text-sm uppercase tracking-[0.24em] text-sky-300/80">
-        Project summary
+    <div className="border rounded-xl p-6 space-y-3">
+      <p className="text-sm text-neutral-500">Yritys</p>
+      <p className="text-lg font-semibold">
+        {project.siteProfile.companyName}
       </p>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/45">
-            Company
-          </p>
-          <p className="mt-2 text-lg font-semibold">{project.siteProfile.companyName}</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/45">
-            Source URL
-          </p>
-          <p className="mt-2 break-all text-sm text-white/80">{project.sourceUrl}</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/45">
-            Created
-          </p>
-          <p className="mt-2 text-sm text-white/80">{project.createdAt}</p>
-        </div>
-
-        <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-white/45">
-            Output type
-          </p>
-          <p className="mt-2 text-sm text-white/80">
-            Homepage redesign concept preview
-          </p>
-        </div>
-      </div>
-    </section>
+      <p className="text-sm text-neutral-500">Yhteenveto</p>
+      <p className="text-neutral-700">{project.businessSummary}</p>
+    </div>
   );
 }
