@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { UrlInputCard } from "@/components/forms/url-input-card";
 import { SiteHeader } from "@/components/layout/site-header";
 import { StatusBadge } from "@/components/projects/status-badge";
 import { mockProjects } from "@/lib/mock/projects";
@@ -17,16 +18,22 @@ export default function ProjectsPage() {
             Projektit
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-white/70">
-            Ensimmäinen vaihe käyttää staattista mock-dataa. Tavoite on rakentaa
-            selkeä virta: projektilista → projektisivu → client preview.
+            Tässä vaiheessa flow on jo oikea, vaikka data on vielä mockattua:
+            URL-input → projektikortti → audit → client preview.
           </p>
         </div>
+
+        <UrlInputCard
+          title="Lisää uusi projekti"
+          description="Tämä input on vielä käyttöliittymä-demo. Seuraavassa vaiheessa se kytketään oikeaan URL:n käsittelyyn."
+          buttonLabel="Create project"
+        />
 
         <section className="grid gap-4">
           {mockProjects.map((project) => (
             <article
               key={project.id}
-              className="rounded-3xl border border-white/10 bg-white/5 p-6"
+              className="rounded-[2rem] border border-white/10 bg-white/5 p-6"
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="max-w-3xl">
