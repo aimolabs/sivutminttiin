@@ -34,7 +34,13 @@ export function generateProjectFromUrl(url: string): Project {
 
   return {
     id: "generated",
-    companyName,
+    siteProfile: {
+      domain: new URL(url).hostname.replace(/^www\./, ""),
+      companyName,
+      industry: "Paikallinen palveluyritys",
+      audience: "Paikalliset asiakkaat",
+      tone: "Selkeä ja luotettava"
+    },
     sourceUrl: url,
     status: "draft",
     createdAt: new Date().toISOString().slice(0, 10),
