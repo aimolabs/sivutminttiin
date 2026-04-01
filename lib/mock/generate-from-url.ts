@@ -3,6 +3,7 @@ import type { StylePresetId } from "./style-presets";
 import { resolveIndustryProfile } from "./industry-profiles";
 import { applyStylePresetToContent } from "./apply-style-preset";
 import { buildSectionPlan } from "./section-plans";
+import { getIndustryAudit } from "./industry-audit";
 
 function extractDomain(url: string): string {
   try {
@@ -52,6 +53,7 @@ export function generateProjectFromUrl(
   const companyName = domainToCompanyName(domain);
   const stylePreset = resolveStylePreset(options?.stylePreset);
   const industryProfile = resolveIndustryProfile(domain);
+  const industryAudit = getIndustryAudit(industryProfile.label.toLowerCase());
 
   const baseAboutBody =
     "Konsepti tekee sivusta myynnillisesti terävämmän. Kävijä näkee nopeammin mitä tarjotaan, miksi siihen kannattaa luottaa ja mitä seuraavaksi kannattaa tehdä. Näin etusivu ei jää vain käyntikortiksi, vaan alkaa ohjata toimintaa.";
@@ -131,25 +133,8 @@ export function generateProjectFromUrl(
     status: "draft",
     createdAt: new Date().toISOString().slice(0, 10),
     businessSummary: buildBusinessSummary(companyName, domain),
-    auditIssues: [
-      {
-        title: "Pääviesti ei lukitu heti",
-        detail:
-          "Kävijän pitäisi ymmärtää muutamassa sekunnissa mitä yritys tekee, kenelle se on tarkoitettu ja miksi siihen kannattaa luottaa. Nykyinen rakenne ei todennäköisesti tee tätä riittävän selvästi."
-      },
-      {
-        title: "Konversiopolku on liian heikko",
-        detail:
-          "Jos ensisijainen toimintakehote ei erotu heti, kiinnostunut kävijä jää helposti selaamaan ilman että etenee yhteydenottoon tai tarjouspyyntöön."
-      },
-      {
-        title: "Luottamuksen rakentaminen jää vajaaksi",
-        detail:
-          "Referenssit, asiakaspalaute, prosessi ja muut uskottavuutta vahvistavat elementit pitäisi tuoda näkyvämmäksi jo etusivulla."
-      }
-    ],
-    suggestedSections: [
-      {
+    auditIssues: industryAudit.auditIssues,
+    suggestedSections: industryAudit.suggestedSections,      {
         name: "Selkeä hero + toimintakehote",
         reason:
           "Ensivaikutelman pitää kertoa heti mitä yritys tarjoaa ja mitä kävijän kannattaa tehdä seuraavaksi."
