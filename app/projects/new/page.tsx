@@ -77,17 +77,17 @@ export default async function NewProjectPage({
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href="/projects/demo"
+                href={`/projects/generated?url=${encodeURIComponent(sourceUrl)}`}
                 className="rounded-full bg-sky-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
               >
-                Continue to demo project
+                Avaa generoitu projekti
               </Link>
 
               <Link
-                href="/projects/demo/preview"
+                href={`/projects/generated/preview?url=${encodeURIComponent(sourceUrl)}`}
                 className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10"
               >
-                Open demo preview directly
+                Avaa preview suoraan
               </Link>
             </div>
           </article>
