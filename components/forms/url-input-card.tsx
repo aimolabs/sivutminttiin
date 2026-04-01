@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MockGenerateActions } from "@/components/forms/mock-generate-actions";
 
@@ -28,6 +29,10 @@ export function UrlInputCard({
   const [url, setUrl] = useState(mockUrl);
 
   const isValid = useMemo(() => isValidHttpUrl(url), [url]);
+  const trimmedUrl = url.trim();
+  const generatedHref = isValid
+    ? `/projects/new?url=${encodeURIComponent(trimmedUrl)}`
+    : "#";
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur md:p-8">
@@ -52,27 +57,26 @@ export function UrlInputCard({
           className="min-h-13 w-full rounded-full border border-white/10 bg-black/20 px-5 text-sm text-white outline-none placeholder:text-white/35"
         />
 
-        <button
-          type="button"
-          className={`min-h-13 shrink-0 rounded-full px-6 text-sm font-semibold transition ${
+        <Link
+          href={generatedHref}
+          aria-disabled={!isValid}
+          className={`flex min-h-13 shrink-0 items-center justify-center rounded-full px-6 text-sm font-semibold transition md:min-w-[220px] ${
             isValid
               ? "bg-sky-300 text-slate-950 hover:opacity-90"
-              : "bg-white/10 text-white/40"
+              : "pointer-events-none cursor-not-allowed bg-white/10 text-white/40"
           }`}
-          disabled
-          aria-hidden="true"
         >
           {buttonLabel}
-        </button>
+        </Link>
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-xs leading-6 text-white/55">
         {isValid
-          ? "URL näyttää kelvolliselta. Jatkamalla rakennetaan siitä mock-projekti ja preview."
+          ? "URL näyttää kelvolliselta. Generate concept vie nyt suoraan mock-generointiin tällä osoitteella."
           : "Anna kelvollinen http:// tai https:// alkava URL, jotta voit jatkaa mock-generointiin."}
       </div>
 
-      <MockGenerateActions url={url} isValid={isValid} />
+      <MockGenerateActions />
     </section>
   );
 }
