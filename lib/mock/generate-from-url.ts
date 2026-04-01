@@ -1,5 +1,6 @@
 import type { Project } from "./projects";
 import type { StylePresetId } from "./style-presets";
+import { resolveIndustryProfile } from "./industry-profiles";
 
 function extractDomain(url: string): string {
   try {
@@ -33,15 +34,16 @@ export function generateProjectFromUrl(url: string): Project {
   const domain = extractDomain(url);
   const companyName = domainToCompanyName(domain);
   const stylePreset: StylePresetId = "premium-dark";
+  const industryProfile = resolveIndustryProfile(domain);
 
   return {
     id: "generated",
     siteProfile: {
       domain,
       companyName,
-      industry: "Paikallinen palveluyritys",
-      audience: "Paikalliset asiakkaat",
-      tone: "Selkeä ja luotettava"
+      industry: industryProfile.label,
+      audience: industryProfile.audience,
+      tone: industryProfile.tone
     },
     sourceUrl: url,
     status: "draft",
@@ -96,33 +98,16 @@ export function generateProjectFromUrl(url: string): Project {
       sections: [
         {
           type: "hero",
-          eyebrow: `Concept for ${companyName}`,
-          headline: `${companyName} ansaitsee selkeämmän ja uskottavamman verkkosivun.`,
-          subheadline:
-            "Tämä ehdotus näyttää, miltä yrityksen etusivu voisi näyttää, kun viesti, palvelut ja yhteydenotto rakennetaan palvelemaan oikeaa konversiota eikä vain olemassaoloa verkossa.",
+          eyebrow: industryProfile.heroEyebrow,
+          headline: industryProfile.heroHeadlineTemplate(companyName),
+          subheadline: industryProfile.heroSubheadline,
           primaryCta: "Pyydä tarjous",
           secondaryCta: "Katso palvelut"
         },
         {
           type: "services",
-          title: "Palvelut selkeästi esiin",
-          items: [
-            {
-              title: "Ydinpalvelu",
-              description:
-                "Etusivun tärkein palvelu nostetaan heti näkyväksi niin, että kävijä ymmärtää mitä yritys myy."
-            },
-            {
-              title: "Lisäpalvelu",
-              description:
-                "Toissijaiset palvelut esitellään tukemaan kokonaiskuvaa ilman että sivu muuttuu sekavaksi."
-            },
-            {
-              title: "Erottava vahvuus",
-              description:
-                "Yrityksen kilpailuetu tai erityisosaaminen tuodaan näkyväksi selkeällä ja uskottavalla tavalla."
-            }
-          ]
+          title: industryProfile.serviceSectionTitle,
+          items: industryProfile.serviceItems
         },
         {
           type: "about",
@@ -148,9 +133,8 @@ export function generateProjectFromUrl(url: string): Project {
         },
         {
           type: "cta",
-          title: "Tehdään yhteydenotosta helppoa",
-          body:
-            "Selkeä loppuosa ja yksi ensisijainen CTA nostavat todennäköisyyttä, että kiinnostunut kävijä ottaa yhteyttä heti eikä palaa asiaan joskus myöhemmin.",
+          title: industryProfile.ctaTitle,
+          body: industryProfile.ctaBody,
           button: "Ota yhteyttä"
         }
       ]
