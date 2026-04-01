@@ -5,13 +5,27 @@ function extractDomain(url: string): string {
     const hostname = new URL(url).hostname;
     return hostname.replace(/^www\./, "");
   } catch {
-    return "tuntematon";
+    return "tuntematon.fi";
   }
 }
 
 function domainToCompanyName(domain: string): string {
   const withoutTld = domain.replace(/\.[^.]+$/, "");
-  return withoutTld.charAt(0).toUpperCase() + withoutTld.slice(1);
+  const cleaned = withoutTld.replace(/[-_]+/g, " ").trim();
+
+  if (!cleaned) {
+    return "Yritys";
+  }
+
+  return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function buildBusinessSummary(companyName: string, domain: string): string {
+  return `${companyName} (${domain}) näyttää tällä hetkellä enemmän tekniseltä olemassaololta kuin selkeältä myyntisivulta. Uudistetun konseptin tavoite on tehdä palvelu ymmärrettäväksi nopeasti, vahvistaa luottamusta ja ohjata kävijä yhteen selkeään seuraavaan toimintaan.`;
 }
 
 export function generateProjectFromUrl(url: string): Project {
@@ -24,79 +38,82 @@ export function generateProjectFromUrl(url: string): Project {
     sourceUrl: url,
     status: "draft",
     createdAt: new Date().toISOString().slice(0, 10),
-    businessSummary:
-      `${companyName}-verkkosivuston nykyinen rakenne ei tue selkeää viestintää. ` +
-      "Etusivu ei johdata kävijää eteenpäin, arvolupaus jää epäselväksi ja mobiilikokemus on puutteellinen.",
+    businessSummary: buildBusinessSummary(companyName, domain),
     auditIssues: [
       {
-        title: "Epäselvä arvolupaus",
+        title: "Pääviesti ei lukitu heti",
         detail:
-          "Sivun pääviesti ei selviä heti — kävijä ei ymmärrä mitä yritys tekee, kenelle ja miksi."
+          "Kävijän pitäisi ymmärtää muutamassa sekunnissa mitä yritys tekee, kenelle se on tarkoitettu ja miksi siihen kannattaa luottaa. Nykyinen rakenne ei todennäköisesti tee tätä riittävän selvästi."
       },
       {
-        title: "Heikko toimintakehotehierarkia",
+        title: "Konversiopolku on liian heikko",
         detail:
-          "Sivulta puuttuu selkeä ensisijainen CTA. Kävijän on vaikea tietää mitä tehdä seuraavaksi."
+          "Jos ensisijainen toimintakehote ei erotu heti, kiinnostunut kävijä jää helposti selaamaan ilman että etenee yhteydenottoon tai tarjouspyyntöön."
       },
       {
-        title: "Luottamussignaalit puuttuvat",
+        title: "Luottamuksen rakentaminen jää vajaaksi",
         detail:
-          "Referenssit, asiakaspalautteet ja prosessikuvaus eivät nouse esiin riittävän selkeästi."
+          "Referenssit, asiakaspalaute, prosessi ja muut uskottavuutta vahvistavat elementit pitäisi tuoda näkyvämmäksi jo etusivulla."
       }
     ],
     suggestedSections: [
       {
-        name: "Hero + selkeä CTA",
-        reason: "Palvelu ja kohderyhmä pitää ymmärtää viidessä sekunnissa."
+        name: "Selkeä hero + toimintakehote",
+        reason:
+          "Ensivaikutelman pitää kertoa heti mitä yritys tarjoaa ja mitä kävijän kannattaa tehdä seuraavaksi."
       },
       {
-        name: "Palvelut kortteina",
-        reason: "Tarjooma pitää saada nopeasti hahmotettavaksi rakenteellisessa muodossa."
+        name: "Palvelut tiiviinä kortteina",
+        reason:
+          "Tarjooma pitää hahmottua nopeasti ilman raskasta tekstimassaa."
       },
       {
         name: "Miksi valita meidät",
-        reason: "Luottamus syntyy selkeydestä, kokemuksesta ja toimintatavasta."
+        reason:
+          "Erottautuminen ja luottamus pitää perustella näkyvästi, ei jättää rivien väliin."
       },
       {
-        name: "Asiakaspalaute",
-        reason: "Sosiaalinen todiste vahvistaa uskottavuutta."
+        name: "Asiakaspalaute tai referenssit",
+        reason:
+          "Sosiaalinen todiste tekee konseptista uskottavamman ja kaupallisemman."
       },
       {
-        name: "Yhteydenotto-osio",
-        reason: "Konversiopolku päättyy yhteen selkeään toimintaan."
+        name: "Vahva CTA-loppuosa",
+        reason:
+          "Etusivun pitää päättyä yhteen selkeään toimenpiteeseen, ei hajota huomiota."
       }
     ],
     redesign: {
       styleDirection:
-        "Moderni, selkeä ja laadukas etusivu, joka viestii ammattimaisuutta ja tekee toimintakehotteesta välittömästi näkyvän.",
+        "Selkeä, moderni ja luottamusta rakentava palveluyrityksen etusivu, jossa viesti, rakenne ja toimintakehotteet tukevat myyntiä.",
       sections: [
         {
           type: "hero",
-          eyebrow: domain,
-          headline: `${companyName} — selkeämpi verkkosivu, enemmän yhteydenottoja.`,
+          eyebrow: `Concept for ${companyName}`,
+          headline: `${companyName} ansaitsee selkeämmän ja uskottavamman verkkosivun.`,
           subheadline:
-            "Tämä konsepti näyttää miltä uudistettu etusivu voisi näyttää: selkeämpi rakenne, vahvempi viesti ja parempi mobiilikokemus.",
+            "Tämä ehdotus näyttää, miltä yrityksen etusivu voisi näyttää, kun viesti, palvelut ja yhteydenotto rakennetaan palvelemaan oikeaa konversiota eikä vain olemassaoloa verkossa.",
           primaryCta: "Pyydä tarjous",
           secondaryCta: "Katso palvelut"
         },
         {
           type: "services",
-          title: "Palvelut",
+          title: "Palvelut selkeästi esiin",
           items: [
             {
               title: "Ydinpalvelu",
               description:
-                "Selkeästi esitelty pääpalvelu, joka vastaa kävijän ensimmäiseen kysymykseen."
+                "Etusivun tärkein palvelu nostetaan heti näkyväksi niin, että kävijä ymmärtää mitä yritys myy."
             },
             {
               title: "Lisäpalvelu",
               description:
-                "Täydentävä tarjooma, joka laajentaa asiakkaan vaihtoehtoja luontevasti."
+                "Toissijaiset palvelut esitellään tukemaan kokonaiskuvaa ilman että sivu muuttuu sekavaksi."
             },
             {
-              title: "Erikoisosaaminen",
+              title: "Erottava vahvuus",
               description:
-                "Erottava tekijä, joka tekee yrityksestä muista poikkeavan valinnan."
+                "Yrityksen kilpailuetu tai erityisosaaminen tuodaan näkyväksi selkeällä ja uskottavalla tavalla."
             }
           ]
         },
@@ -104,30 +121,29 @@ export function generateProjectFromUrl(url: string): Project {
           type: "about",
           title: "Miksi tämä konsepti toimii paremmin",
           body:
-            "Uusi rakenne tekee yrityksen osaamisesta välittömästi uskottavampaa. " +
-            "Pääviesti, palvelut ja yhteydenotto tukevat samaa tavoitetta: kävijän pitää ymmärtää nopeasti mitä tarjotaan ja miten pääsee eteenpäin."
+            "Konsepti tekee sivusta myynnillisesti terävämmän. Kävijä näkee nopeammin mitä tarjotaan, miksi siihen kannattaa luottaa ja mitä seuraavaksi kannattaa tehdä. Näin etusivu ei jää vain käyntikortiksi, vaan alkaa ohjata toimintaa."
         },
         {
           type: "testimonials",
-          title: "Asiakkaiden luottamus näkyväksi",
+          title: "Luottamus näkyväksi",
           items: [
             {
               quote:
-                "Työ valmistui sovitusti ja viestintä toimi koko projektin ajan erinomaisesti.",
-              name: "Asiakas 1"
+                "Selkeämpi rakenne ja vahvempi viesti tekevät yrityksestä heti ammattimaisemman oloisen.",
+              name: "Konseptihavainto 1"
             },
             {
               quote:
-                "Siisti lopputulos ja erittäin helppo asioida. Suosittelen.",
-              name: "Asiakas 2"
+                "Kun CTA, palvelut ja luottamussignaalit ovat näkyvissä, sivu alkaa näyttää oikealta myyntityökalulta.",
+              name: "Konseptihavainto 2"
             }
           ]
         },
         {
           type: "cta",
-          title: "Pyydä tarjous helposti",
+          title: "Tehdään yhteydenotosta helppoa",
           body:
-            "Selkeä yhteydenotto-osio nostaa todennäköisyyttä, että kiinnostunut kävijä ottaa heti yhteyttä.",
+            "Selkeä loppuosa ja yksi ensisijainen CTA nostavat todennäköisyyttä, että kiinnostunut kävijä ottaa yhteyttä heti eikä palaa asiaan joskus myöhemmin.",
           button: "Ota yhteyttä"
         }
       ]

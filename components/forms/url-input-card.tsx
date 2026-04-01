@@ -9,9 +9,9 @@ type UrlInputCardProps = {
 
 export function UrlInputCard({
   title = "Luo uusi redesign-projekti",
-  description = "Syötä yrityksen nettisivun osoite. Ensimmäisessä versiossa tämä on vielä käyttöliittymätason mock, ei oikea analyysi.",
+  description = "Syötä yrityksen nettisivun osoite. Tässä vaiheessa URL:stä muodostetaan mock-konsepti, jotta koko flow voidaan testata ennen oikeaa scrapingia ja analyysiä.",
   buttonLabel = "Generate concept",
-  mockUrl = "https://example-company.fi"
+  mockUrl = "https://www.rakennuslaine.fi"
 }: UrlInputCardProps) {
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur md:p-8">
@@ -44,9 +44,8 @@ export function UrlInputCard({
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-xs leading-6 text-white/55">
-        Tässä vaiheessa nappi ei vielä suorita oikeaa analyysiä. Alla oleva mock-flow
-        vie seuraavaan näkymään, jossa esitellään miten URL käsiteltäisiin ennen
-        varsinaisen projektin luontia.
+        Tämä ei vielä tee oikeaa sivuanalyysiä. Seuraava vaihe rakentaa annetusta
+        URL:stä uskottavan mock-projektin ja asiakkaalle näytettävän preview’n.
       </div>
 
       <MockGenerateActions url={mockUrl} />

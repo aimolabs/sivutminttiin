@@ -31,14 +31,20 @@ export default async function GeneratedProjectPage({
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="max-w-3xl">
-              <div className="flex items-center gap-3">
+              <p className="text-sm uppercase tracking-[0.24em] text-sky-300/80">
+                Generated concept project
+              </p>
+
+              <div className="mt-3 flex items-center gap-3">
                 <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
                   {project.companyName}
                 </h1>
                 <StatusBadge status={project.status} />
               </div>
 
-              <p className="mt-4 text-sm text-sky-300/80">{project.sourceUrl}</p>
+              <p className="mt-4 break-all text-sm text-sky-300/80">
+                {project.sourceUrl}
+              </p>
 
               <p className="mt-5 text-base leading-7 text-white/75">
                 {project.businessSummary}
@@ -60,6 +66,31 @@ export default async function GeneratedProjectPage({
                 Takaisin projekteihin
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+              Project context
+            </p>
+            <p className="mt-3 text-sm leading-7 text-white/70">
+              Tämä on väliaikainen URL-pohjainen konseptiprojekti. Sitä ei ole
+              tallennettu tietokantaan, vaan se muodostetaan annetusta URL:stä
+              mock-logiikalla, jotta koko myynti- ja preview-flow voidaan testata
+              ennen oikeaa scraping- ja analyysiputkea.
+            </p>
+          </div>
+
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+              Why this matters
+            </p>
+            <p className="mt-3 text-sm leading-7 text-white/70">
+              Nyt järjestelmä ei enää näytä pelkkää kovakoodattua demoa, vaan
+              tuottaa URL:stä yrityskohtaiselta näyttävän projektin, josta voi
+              siirtyä suoraan asiakkaalle näytettävään preview-versioon.
+            </p>
           </div>
         </section>
 
