@@ -53,7 +53,7 @@ export function generateProjectFromUrl(
   const companyName = domainToCompanyName(domain);
   const stylePreset = resolveStylePreset(options?.stylePreset);
   const industryProfile = resolveIndustryProfile(domain);
-  const industryAudit = getIndustryAudit(industryProfile.label.toLowerCase());
+  const industryAudit = getIndustryAudit(industryProfile.label.toLowerCase(), companyName);
 
   const baseAboutBody =
     "Konsepti tekee sivusta myynnillisesti terävämmän. Kävijä näkee nopeammin mitä tarjotaan, miksi siihen kannattaa luottaa ja mitä seuraavaksi kannattaa tehdä. Näin etusivu ei jää vain käyntikortiksi, vaan alkaa ohjata toimintaa.";

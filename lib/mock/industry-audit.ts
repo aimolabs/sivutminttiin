@@ -5,68 +5,70 @@ type IndustryAudit = {
   suggestedSections: SuggestedSection[];
 };
 
-export function getIndustryAudit(industry: string): IndustryAudit {
+export function getIndustryAudit(
+  industry: string,
+  companyName: string
+): IndustryAudit {
   if (industry.includes("rakennus") || industry.includes("remont")) {
     return {
       auditIssues: [
         {
           title: "Luotettavuus ei välity heti",
           detail:
-            "Rakennus- ja remonttipalveluissa päätös perustuu pitkälti luottamukseen. Nykyinen sivu ei tuo riittävästi esiin kokemusta, referenssejä tai työn laatua heti etusivulla."
+            `${companyName} sivu näyttää siltä, että se ei vielä hyödynnä luottamusta rakentavia elementtejä täysimääräisesti. Rakennusalalla päätös perustuu usein referensseihin ja kokemukseen, mutta nämä eivät todennäköisesti nouse riittävän näkyvästi heti etusivulla.`
         },
         {
           title: "Palvelukokonaisuus jää epäselväksi",
           detail:
-            "Kävijän on vaikea hahmottaa nopeasti mitä kaikkea yritys tekee ja mitä palveluita kannattaa pyytää tarjouksena."
+            `Kävijälle ei välttämättä muodostu nopeasti selkeää kuvaa siitä, mitä kaikkea ${companyName} tarjoaa. Tämä on tyypillinen ongelma vastaavilla sivuilla, joissa sisältö on olemassa mutta rakennetta ei ole optimoitu nopeaan ymmärtämiseen.`
         },
         {
           title: "Yhteydenotto ei ole riittävän ohjattu",
           detail:
-            "Tarjouspyyntöön ohjaava rakenne puuttuu tai jää liian heikoksi, mikä laskee konversiota."
+            `Sivun rakenne ei todennäköisesti ohjaa käyttäjää riittävän selkeästi tarjouspyyntöön. Usein tämä näkyy siinä, että CTA:t jäävät visuaalisesti heikoiksi tai sijoittuvat väärään kohtaan sivua.`
         }
       ],
       suggestedSections: [
         {
           name: "Referenssit / ennen–jälkeen kuvat",
           reason:
-            "Näyttämällä konkreettisia töitä kasvatetaan luottamusta välittömästi."
+            `Jos ${companyName} nostaa konkreettiset työt näkyviin, luottamus kasvaa välittömästi ilman lisäselityksiä.`
         },
         {
           name: "Selkeä palvelulistaus",
           reason:
-            "Kävijän pitää nopeasti ymmärtää mitä kaikkea yritys tekee."
+            "Palvelut kannattaa esittää tavalla, jonka kävijä ymmärtää sekunneissa ilman tulkintaa."
         },
         {
           name: "Prosessin kuvaus",
           reason:
-            "Selkeä eteneminen lisää turvallisuuden tunnetta asiakkaalle."
+            "Selkeä eteneminen poistaa epävarmuutta ja madaltaa yhteydenoton kynnystä."
         },
         {
           name: "Vahva tarjous-CTA",
           reason:
-            "Kävijä pitää ohjata yhteen selkeään toimintaan ilman häiriöitä."
+            "Yksi selkeä toimintakehote toimii paremmin kuin useat hajanaiset vaihtoehdot."
         }
       ]
     };
   }
 
-  // default fallback
   return {
     auditIssues: [
       {
         title: "Pääviesti ei lukitu heti",
         detail:
-          "Kävijän pitäisi ymmärtää muutamassa sekunnissa mitä yritys tekee, kenelle ja miksi siihen kannattaa luottaa."
+          `${companyName} sivu vaikuttaa siltä, että sen pääviesti ei välity täysin selkeästi ensimmäisten sekuntien aikana. Tämä on yleinen haaste sivuilla, joissa sisältö on olemassa mutta priorisointi ei ole riittävän terävä.`
       },
       {
         title: "Konversiopolku on heikko",
         detail:
-          "Jos toimintakehote ei erotu selvästi, kävijä ei etene seuraavaan vaiheeseen."
+          "Kävijälle ei todennäköisesti muodostu selkeää seuraavaa askelta. Tämä johtaa usein siihen, että kiinnostus ei muutu yhteydenotoksi."
       },
       {
         title: "Luottamussignaalit puuttuvat",
         detail:
-          "Referenssit, asiakaspalaute ja konkreettiset esimerkit puuttuvat tai jäävät piiloon."
+          "Referenssit, asiakaspalaute ja muut uskottavuutta vahvistavat elementit eivät näytä olevan keskiössä, mikä heikentää kokonaisvaikutelmaa."
       }
     ],
     suggestedSections: [
