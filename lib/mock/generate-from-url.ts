@@ -2,6 +2,7 @@ import type { Project } from "./projects";
 import type { StylePresetId } from "./style-presets";
 import { resolveIndustryProfile } from "./industry-profiles";
 import { applyStylePresetToContent } from "./apply-style-preset";
+import { buildSectionPlan } from "./section-plans";
 
 function extractDomain(url: string): string {
   try {
@@ -64,6 +65,59 @@ export function generateProjectFromUrl(
     baseAboutBody
   });
 
+  const heroSection = {
+    type: "hero" as const,
+    eyebrow: industryProfile.heroEyebrow,
+    headline: presetContent.heroHeadline,
+    subheadline: presetContent.heroSubheadline,
+    primaryCta: presetContent.primaryCta,
+    secondaryCta: presetContent.secondaryCta
+  };
+
+  const servicesSection = {
+    type: "services" as const,
+    title: industryProfile.serviceSectionTitle,
+    items: industryProfile.serviceItems
+  };
+
+  const aboutSection = {
+    type: "about" as const,
+    title: presetContent.aboutTitle,
+    body: presetContent.aboutBody
+  };
+
+  const testimonialsSection = {
+    type: "testimonials" as const,
+    title: presetContent.testimonialsTitle,
+    items: [
+      {
+        quote:
+          "Selkeämpi rakenne ja vahvempi viesti tekevät yrityksestä heti ammattimaisemman oloisen.",
+        name: "Konseptihavainto 1"
+      },
+      {
+        quote:
+          "Kun CTA, palvelut ja luottamussignaalit ovat näkyvissä, sivu alkaa näyttää oikealta myyntityökalulta.",
+        name: "Konseptihavainto 2"
+      }
+    ]
+  };
+
+  const ctaSection = {
+    type: "cta" as const,
+    title: industryProfile.ctaTitle,
+    body: industryProfile.ctaBody,
+    button: presetContent.primaryCta
+  };
+
+  const sections = buildSectionPlan(stylePreset, {
+    hero: heroSection,
+    services: servicesSection,
+    about: aboutSection,
+    testimonials: testimonialsSection,
+    cta: ctaSection
+  });
+
   return {
     id: "generated",
     siteProfile: {
@@ -123,48 +177,7 @@ export function generateProjectFromUrl(
     ],
     redesign: {
       stylePreset,
-      sections: [
-        {
-          type: "hero",
-          eyebrow: industryProfile.heroEyebrow,
-          headline: presetContent.heroHeadline,
-          subheadline: presetContent.heroSubheadline,
-          primaryCta: presetContent.primaryCta,
-          secondaryCta: presetContent.secondaryCta
-        },
-        {
-          type: "services",
-          title: industryProfile.serviceSectionTitle,
-          items: industryProfile.serviceItems
-        },
-        {
-          type: "about",
-          title: presetContent.aboutTitle,
-          body: presetContent.aboutBody
-        },
-        {
-          type: "testimonials",
-          title: presetContent.testimonialsTitle,
-          items: [
-            {
-              quote:
-                "Selkeämpi rakenne ja vahvempi viesti tekevät yrityksestä heti ammattimaisemman oloisen.",
-              name: "Konseptihavainto 1"
-            },
-            {
-              quote:
-                "Kun CTA, palvelut ja luottamussignaalit ovat näkyvissä, sivu alkaa näyttää oikealta myyntityökalulta.",
-              name: "Konseptihavainto 2"
-            }
-          ]
-        },
-        {
-          type: "cta",
-          title: industryProfile.ctaTitle,
-          body: industryProfile.ctaBody,
-          button: presetContent.primaryCta
-        }
-      ]
+      sections
     }
   };
 }
