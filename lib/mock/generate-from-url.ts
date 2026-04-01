@@ -134,32 +134,7 @@ export function generateProjectFromUrl(
     createdAt: new Date().toISOString().slice(0, 10),
     businessSummary: buildBusinessSummary(companyName, domain),
     auditIssues: industryAudit.auditIssues,
-    suggestedSections: industryAudit.suggestedSections,      {
-        name: "Selkeä hero + toimintakehote",
-        reason:
-          "Ensivaikutelman pitää kertoa heti mitä yritys tarjoaa ja mitä kävijän kannattaa tehdä seuraavaksi."
-      },
-      {
-        name: "Palvelut tiiviinä kortteina",
-        reason:
-          "Tarjooma pitää hahmottua nopeasti ilman raskasta tekstimassaa."
-      },
-      {
-        name: "Miksi valita meidät",
-        reason:
-          "Erottautuminen ja luottamus pitää perustella näkyvästi, ei jättää rivien väliin."
-      },
-      {
-        name: "Asiakaspalaute tai referenssit",
-        reason:
-          "Sosiaalinen todiste tekee konseptista uskottavamman ja kaupallisemman."
-      },
-      {
-        name: "Vahva CTA-loppuosa",
-        reason:
-          "Etusivun pitää päättyä yhteen selkeään toimenpiteeseen, ei hajota huomiota."
-      }
-    ],
+    suggestedSections: industryAudit.suggestedSections,
     redesign: {
       stylePreset,
       sections
