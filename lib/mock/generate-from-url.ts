@@ -1,6 +1,7 @@
 import type { Project } from "./projects";
 import type { StylePresetId } from "./style-presets";
 import { resolveIndustryProfile } from "./industry-profiles";
+import { applyStylePresetToContent } from "./apply-style-preset";
 
 function extractDomain(url: string): string {
   try {
@@ -35,6 +36,18 @@ export function generateProjectFromUrl(url: string): Project {
   const companyName = domainToCompanyName(domain);
   const stylePreset: StylePresetId = "premium-dark";
   const industryProfile = resolveIndustryProfile(domain);
+
+  const baseAboutBody =
+    "Konsepti tekee sivusta myynnillisesti terävämmän. Kävijä näkee nopeammin mitä tarjotaan, miksi siihen kannattaa luottaa ja mitä seuraavaksi kannattaa tehdä. Näin etusivu ei jää vain käyntikortiksi, vaan alkaa ohjata toimintaa.";
+
+  const presetContent = applyStylePresetToContent({
+    stylePreset,
+    companyName,
+    industryLabel: industryProfile.label,
+    baseHeadline: industryProfile.heroHeadlineTemplate(companyName),
+    baseSubheadline: industryProfile.heroSubheadline,
+    baseAboutBody
+  });
 
   return {
     id: "generated",
@@ -99,10 +112,10 @@ export function generateProjectFromUrl(url: string): Project {
         {
           type: "hero",
           eyebrow: industryProfile.heroEyebrow,
-          headline: industryProfile.heroHeadlineTemplate(companyName),
-          subheadline: industryProfile.heroSubheadline,
-          primaryCta: "Pyydä tarjous",
-          secondaryCta: "Katso palvelut"
+          headline: presetContent.heroHeadline,
+          subheadline: presetContent.heroSubheadline,
+          primaryCta: presetContent.primaryCta,
+          secondaryCta: presetContent.secondaryCta
         },
         {
           type: "services",
@@ -111,13 +124,12 @@ export function generateProjectFromUrl(url: string): Project {
         },
         {
           type: "about",
-          title: "Miksi tämä konsepti toimii paremmin",
-          body:
-            "Konsepti tekee sivusta myynnillisesti terävämmän. Kävijä näkee nopeammin mitä tarjotaan, miksi siihen kannattaa luottaa ja mitä seuraavaksi kannattaa tehdä. Näin etusivu ei jää vain käyntikortiksi, vaan alkaa ohjata toimintaa."
+          title: presetContent.aboutTitle,
+          body: presetContent.aboutBody
         },
         {
           type: "testimonials",
-          title: "Luottamus näkyväksi",
+          title: presetContent.testimonialsTitle,
           items: [
             {
               quote:
@@ -135,7 +147,7 @@ export function generateProjectFromUrl(url: string): Project {
           type: "cta",
           title: industryProfile.ctaTitle,
           body: industryProfile.ctaBody,
-          button: "Ota yhteyttä"
+          button: presetContent.primaryCta
         }
       ]
     }
