@@ -8,20 +8,20 @@ export default function HomePage() {
       <SiteHeader />
 
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10 md:px-10 md:py-14">
-        <section className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
+        <section className="grid gap-6 md:grid-cols-[1.15fr_0.85fr]">
           <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur md:p-8">
             <p className="text-sm uppercase tracking-[0.28em] text-sky-300/80">
               Website redesign proposal tool
             </p>
 
             <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-              Tee huonoista nettisivuista parempi ehdotus, nopeasti.
+              Muuta heikot nettisivut vakuuttavaksi redesign-ehdotukseksi.
             </h1>
 
             <p className="mt-6 max-w-2xl text-base leading-7 text-white/70 md:text-lg">
-              Tämä työkalu on tarkoitettu myyntikäyttöön: syötetään yrityksen nykyinen
-              sivu, analysoidaan rakenne ja rakennetaan selkeämpi redesign-konsepti,
-              joka voidaan näyttää asiakkaalle preview-linkillä.
+              Työkalu on tarkoitettu myyntikäyttöön. Syötetään yrityksen nykyinen
+              sivu, muodostetaan siitä audit-ajattelu ja rakennetaan asiakasta varten
+              selkeä preview-konsepti.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -42,14 +42,15 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 md:p-8">
-            <p className="text-sm font-semibold text-white">MVP rajaus</p>
+            <p className="text-sm font-semibold text-white">MVP scope</p>
 
             <div className="mt-5 space-y-4">
               {[
                 "Homepage redesign only",
-                "Internal dashboard first",
-                "One shareable concept preview",
-                "Static mock data before real AI pipeline"
+                "Internal dashboard workflow",
+                "One client-facing concept preview",
+                "Mock generation before real scraping",
+                "Schema-style sections, not raw AI HTML"
               ].map((item) => (
                 <div
                   key={item}
@@ -68,15 +69,15 @@ export default function HomePage() {
           {[
             {
               title: "1. Source page in",
-              text: "Yrityksen nykyinen URL toimii lähtökohtana auditille ja uudelle konseptille."
+              text: "Yrityksen nykyinen URL toimii lähtöpisteenä auditille ja uudelle konseptille."
             },
             {
-              title: "2. Analysis + structure",
-              text: "Työkalu tunnistaa viestinnän ongelmat ja ehdottaa selkeämpää sivurakennetta."
+              title: "2. Clearer structure out",
+              text: "Työkalu muuttaa sekavan sivun ymmärrettävämmäksi viestinnäksi ja rakenteeksi."
             },
             {
-              title: "3. Client preview out",
-              text: "Lopputuloksena syntyy siisti, jaettava preview-linkki asiakasta varten."
+              title: "3. Client preview ready",
+              text: "Lopputulos on jaettava preview-linkki, jolla redesign voidaan näyttää asiakkaalle."
             }
           ].map((card) => (
             <article
