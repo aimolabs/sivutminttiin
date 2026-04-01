@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/layout/site-header";
-import { STYLE_PRESETS } from "@/lib/mock/style-presets";
+import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type NewProjectPageProps = {
   searchParams: Promise<{
@@ -9,13 +9,24 @@ type NewProjectPageProps = {
   }>;
 };
 
+function resolveStylePreset(input?: string): StylePresetId {
+  switch (input) {
+    case "minimal-trust":
+    case "premium-dark":
+    case "bold-modern":
+    case "editorial-clean":
+      return input;
+    default:
+      return "premium-dark";
+  }
+}
+
 export default async function NewProjectPage({
   searchParams
 }: NewProjectPageProps) {
   const { url, stylePreset } = await searchParams;
   const sourceUrl = url || "https://example-company.fi";
-  const resolvedStylePreset =
-    stylePreset && stylePreset in STYLE_PRESETS ? stylePreset : "premium-dark";
+  const resolvedStylePreset = resolveStylePreset(stylePreset);
   const preset = STYLE_PRESETS[resolvedStylePreset];
 
   return (
