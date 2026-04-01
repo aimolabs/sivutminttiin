@@ -1,17 +1,29 @@
 import Link from "next/link";
 
 type MockGenerateActionsProps = {
-  url?: string;
+  url: string;
+  isValid: boolean;
 };
 
 export function MockGenerateActions({
-  url = "https://example-company.fi"
+  url,
+  isValid
 }: MockGenerateActionsProps) {
+  const trimmedUrl = url.trim();
+  const generatedHref = isValid
+    ? `/projects/new?url=${encodeURIComponent(trimmedUrl)}`
+    : "#";
+
   return (
     <div className="mt-6 flex flex-wrap gap-3">
       <Link
-        href={`/projects/new?url=${encodeURIComponent(url)}`}
-        className="rounded-full bg-sky-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
+        href={generatedHref}
+        aria-disabled={!isValid}
+        className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
+          isValid
+            ? "bg-sky-300 text-slate-950 hover:opacity-90"
+            : "cursor-not-allowed bg-white/10 text-white/40 pointer-events-none"
+        }`}
       >
         Continue to mock generation
       </Link>
