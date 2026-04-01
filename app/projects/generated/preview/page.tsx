@@ -72,14 +72,7 @@ export default async function GeneratedPreviewPage({
       </section>
 
       <div className="mx-auto flex w-full max-w-6xl flex-col px-6 py-10 md:px-10">
-        {project.redesign.sections.map((section, index) => (
-          <PreviewSectionRenderer
-            key={`${section.type}-${index}`}
-            section={section}
-            index={index}
-            project={project}
-          />
-        ))}
+        <PreviewSectionRenderer project={project} />
       </div>
     </main>
   );
