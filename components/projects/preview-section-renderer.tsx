@@ -1,12 +1,13 @@
 import { Project } from "@/lib/mock/projects";
-import { STYLE_PRESETS } from "@/lib/mock/style-presets";
+import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type Props = {
   project: Project;
 };
 
 export function PreviewSectionRenderer({ project }: Props) {
-  const preset = STYLE_PRESETS[project.redesign.stylePreset];
+  const stylePresetId = project.redesign.stylePreset as StylePresetId;
+  const preset = STYLE_PRESETS[stylePresetId];
 
   const isDark = preset.visual.theme === "dark";
 
@@ -15,7 +16,6 @@ export function PreviewSectionRenderer({ project }: Props) {
     : "space-y-16 rounded-[2rem] bg-white text-neutral-950 p-8 md:p-12";
 
   const mutedTextClasses = isDark ? "text-neutral-400" : "text-neutral-600";
-
   const subtleTextClasses = isDark ? "text-neutral-500" : "text-neutral-500";
 
   const cardClasses = isDark
