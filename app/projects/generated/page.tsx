@@ -5,25 +5,33 @@ import { StatusBadge } from "@/components/projects/status-badge";
 import { ProjectAuditGrid } from "@/components/projects/project-audit-grid";
 import { ProjectSummaryCard } from "@/components/projects/project-summary-card";
 import { generateProjectFromUrl } from "@/lib/mock/generate-from-url";
-import { STYLE_PRESETS } from "@/lib/mock/style-presets";
+import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type GeneratedProjectPageProps = {
   searchParams: Promise<{
     url?: string;
+    stylePreset?: string;
   }>;
 };
+
+const PRESET_ORDER: StylePresetId[] = [
+  "premium-dark",
+  "minimal-trust",
+  "bold-modern",
+  "editorial-clean"
+];
 
 export default async function GeneratedProjectPage({
   searchParams
 }: GeneratedProjectPageProps) {
-  const { url } = await searchParams;
+  const { url, stylePreset } = await searchParams;
 
   if (!url) {
     notFound();
   }
 
-  const project = generateProjectFromUrl(url);
-  const stylePreset = STYLE_PRESETS[project.redesign.stylePreset];
+  const project = generateProjectFromUrl(url, { stylePreset });
+  const activeStylePreset = STYLE_PRESETS[project.redesign.stylePreset];
 
   return (
     <main className="min-h-screen">
@@ -55,7 +63,7 @@ export default async function GeneratedProjectPage({
 
             <div className="flex flex-wrap gap-3">
               <Link
-                href={`/projects/generated/preview?url=${encodeURIComponent(url)}`}
+                href={`/projects/generated/preview?url=${encodeURIComponent(url)}&stylePreset=${project.redesign.stylePreset}`}
                 className="rounded-full bg-sky-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
               >
                 Avaa client preview
@@ -69,6 +77,39 @@ export default async function GeneratedProjectPage({
               </Link>
             </div>
           </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+            Choose style direction
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            {PRESET_ORDER.map((presetId) => {
+              const preset = STYLE_PRESETS[presetId];
+              const isActive = presetId === project.redesign.stylePreset;
+
+              return (
+                <Link
+                  key={preset.id}
+                  href={`/projects/generated?url=${encodeURIComponent(url)}&stylePreset=${preset.id}`}
+                  className={
+                    isActive
+                      ? "rounded-full bg-sky-300 px-4 py-2 text-sm font-semibold text-slate-950"
+                      : "rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/85 transition hover:bg-white/10"
+                  }
+                >
+                  {preset.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <p className="mt-4 max-w-3xl text-sm leading-7 text-white/70">
+            Valittu suunta: <span className="font-semibold text-white">{activeStylePreset.label}</span>.
+            Tämä vaikuttaa sekä previewn visuaaliseen tunnelmaan että generoitujen
+            tekstien sävyyn.
+          </p>
         </section>
 
         <section className="grid gap-4 md:grid-cols-[1.1fr_0.9fr]">
@@ -104,7 +145,7 @@ export default async function GeneratedProjectPage({
             Style direction
           </p>
           <p className="mt-4 max-w-3xl text-base leading-7 text-white/75">
-            {stylePreset.description}
+            {activeStylePreset.description}
           </p>
         </section>
       </div>

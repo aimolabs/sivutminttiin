@@ -31,10 +31,25 @@ function buildBusinessSummary(companyName: string, domain: string): string {
   return `${companyName} (${domain}) näyttää tällä hetkellä enemmän tekniseltä olemassaololta kuin selkeältä myyntisivulta. Uudistetun konseptin tavoite on tehdä palvelu ymmärrettäväksi nopeasti, vahvistaa luottamusta ja ohjata kävijä yhteen selkeään seuraavaan toimintaan.`;
 }
 
-export function generateProjectFromUrl(url: string): Project {
+function resolveStylePreset(input?: string): StylePresetId {
+  switch (input) {
+    case "minimal-trust":
+    case "premium-dark":
+    case "bold-modern":
+    case "editorial-clean":
+      return input;
+    default:
+      return "premium-dark";
+  }
+}
+
+export function generateProjectFromUrl(
+  url: string,
+  options?: { stylePreset?: string }
+): Project {
   const domain = extractDomain(url);
   const companyName = domainToCompanyName(domain);
-  const stylePreset: StylePresetId = "premium-dark";
+  const stylePreset = resolveStylePreset(options?.stylePreset);
   const industryProfile = resolveIndustryProfile(domain);
 
   const baseAboutBody =
