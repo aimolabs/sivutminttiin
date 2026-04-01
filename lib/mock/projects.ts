@@ -8,6 +8,14 @@ export type SuggestedSection = {
   reason: string;
 };
 
+export type SiteProfile = {
+  domain: string;
+  companyName: string;
+  industry: string;
+  audience: string;
+  tone: string;
+};
+
 export type RedesignSection =
   | {
       type: "hero";
@@ -47,7 +55,7 @@ export type RedesignSection =
 
 export type Project = {
   id: string;
-  companyName: string;
+  siteProfile: SiteProfile; // 👈 uusi
   sourceUrl: string;
   status: "draft" | "ready";
   createdAt: string;
@@ -63,7 +71,13 @@ export type Project = {
 export const mockProjects: Project[] = [
   {
     id: "demo",
-    companyName: "Rakennus Laine",
+    siteProfile: {
+      domain: "rakennuslaine.fi",
+      companyName: "Rakennus Laine",
+      industry: "Rakennus ja remontointi",
+      audience: "Kotitaloudet Uudellamaalla",
+      tone: "Luotettava ja selkeä palveluyritys"
+    },
     sourceUrl: "https://rakennuslaine.fi",
     status: "ready",
     createdAt: "2026-04-01",
@@ -109,12 +123,14 @@ export const mockProjects: Project[] = [
       }
     ],
     redesign: {
-      styleDirection: "Moderni, tumma, laadukas ja helposti lähestyttävä palveluyrityksen etusivu.",
+      styleDirection:
+        "Moderni, tumma, laadukas ja helposti lähestyttävä palveluyrityksen etusivu.",
       sections: [
         {
           type: "hero",
           eyebrow: "Rakennus ja remontointi",
-          headline: "Luotettava tekijä remontteihin ja rakennustöihin Uudellamaalla.",
+          headline:
+            "Luotettava tekijä remontteihin ja rakennustöihin Uudellamaalla.",
           subheadline:
             "Selkeämpi palvelu, laadukas työnjälki ja sujuva yhteydenotto. Uudistettu konsepti tekee tarjonnasta heti ymmärrettävän.",
           primaryCta: "Pyydä tarjous",
