@@ -1,3 +1,5 @@
+import { StylePresetId } from "./style-presets";
+
 export type AuditIssue = {
   title: string;
   detail: string;
@@ -55,7 +57,7 @@ export type RedesignSection =
 
 export type Project = {
   id: string;
-  siteProfile: SiteProfile; // 👈 uusi
+  siteProfile: SiteProfile;
   sourceUrl: string;
   status: "draft" | "ready";
   createdAt: string;
@@ -63,7 +65,7 @@ export type Project = {
   auditIssues: AuditIssue[];
   suggestedSections: SuggestedSection[];
   redesign: {
-    styleDirection: string;
+    stylePreset: StylePresetId;
     sections: RedesignSection[];
   };
 };
@@ -103,7 +105,7 @@ export const mockProjects: Project[] = [
     suggestedSections: [
       {
         name: "Hero + selkeä CTA",
-        reason: "Yrityksen palvelu ja toimintalue pitää ymmärtää viidessä sekunnissa."
+        reason: "Yrityksen palvelu ja toiminta-alue pitää ymmärtää viidessä sekunnissa."
       },
       {
         name: "Palvelut kortteina",
@@ -123,8 +125,7 @@ export const mockProjects: Project[] = [
       }
     ],
     redesign: {
-      styleDirection:
-        "Moderni, tumma, laadukas ja helposti lähestyttävä palveluyrityksen etusivu.",
+      stylePreset: "premium-dark",
       sections: [
         {
           type: "hero",
