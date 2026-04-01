@@ -1,17 +1,22 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/layout/site-header";
+import { STYLE_PRESETS } from "@/lib/mock/style-presets";
 
 type NewProjectPageProps = {
   searchParams: Promise<{
     url?: string;
+    stylePreset?: string;
   }>;
 };
 
 export default async function NewProjectPage({
   searchParams
 }: NewProjectPageProps) {
-  const { url } = await searchParams;
+  const { url, stylePreset } = await searchParams;
   const sourceUrl = url || "https://example-company.fi";
+  const resolvedStylePreset =
+    stylePreset && stylePreset in STYLE_PRESETS ? stylePreset : "premium-dark";
+  const preset = STYLE_PRESETS[resolvedStylePreset];
 
   return (
     <main className="min-h-screen">
@@ -45,6 +50,18 @@ export default async function NewProjectPage({
           </article>
 
           <article className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+            <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+              Selected style preset
+            </p>
+            <p className="mt-3 text-lg font-semibold text-white">
+              {preset.label}
+            </p>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-white/70">
+              {preset.description}
+            </p>
+          </article>
+
+          <article className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
             <h2 className="text-xl font-semibold">What the real pipeline will do</h2>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -71,20 +88,20 @@ export default async function NewProjectPage({
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/70">
               Oikea uusi projekti luotaisiin tähän vaiheeseen vasta sen jälkeen, kun
               URL-fetch, HTML parsing ja schema-pohjainen output on toteutettu.
-              Tällä hetkellä jatkoreitti ohjaa demoprojektiin, jotta koko käyttövirta
-              voidaan testata jo ennen backend-työtä.
+              Tällä hetkellä jatkoreitti ohjaa generoituihin mock-näkymiin, jotta koko
+              käyttövirta voidaan testata jo ennen backend-työtä.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href={`/projects/generated?url=${encodeURIComponent(sourceUrl)}`}
+                href={`/projects/generated?url=${encodeURIComponent(sourceUrl)}&stylePreset=${encodeURIComponent(resolvedStylePreset)}`}
                 className="rounded-full bg-sky-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
               >
                 Avaa generoitu projekti
               </Link>
 
               <Link
-                href={`/projects/generated/preview?url=${encodeURIComponent(sourceUrl)}`}
+                href={`/projects/generated/preview?url=${encodeURIComponent(sourceUrl)}&stylePreset=${encodeURIComponent(resolvedStylePreset)}`}
                 className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10"
               >
                 Avaa preview suoraan

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MockGenerateActions } from "@/components/forms/mock-generate-actions";
+import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type UrlInputCardProps = {
   title?: string;
@@ -10,6 +11,13 @@ type UrlInputCardProps = {
   buttonLabel?: string;
   mockUrl?: string;
 };
+
+const PRESET_ORDER: StylePresetId[] = [
+  "premium-dark",
+  "minimal-trust",
+  "bold-modern",
+  "editorial-clean"
+];
 
 function isValidHttpUrl(value: string): boolean {
   try {
@@ -27,12 +35,16 @@ export function UrlInputCard({
   mockUrl = "https://www.rakennuslaine.fi"
 }: UrlInputCardProps) {
   const [url, setUrl] = useState(mockUrl);
+  const [stylePreset, setStylePreset] = useState<StylePresetId>("premium-dark");
 
   const isValid = useMemo(() => isValidHttpUrl(url), [url]);
   const trimmedUrl = url.trim();
+
   const generatedHref = isValid
-    ? `/projects/new?url=${encodeURIComponent(trimmedUrl)}`
+    ? `/projects/new?url=${encodeURIComponent(trimmedUrl)}&stylePreset=${encodeURIComponent(stylePreset)}`
     : "#";
+
+  const activePreset = STYLE_PRESETS[stylePreset];
 
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur md:p-8">
@@ -48,31 +60,67 @@ export function UrlInputCard({
         </p>
       </div>
 
-      <div className="mt-8 flex flex-col gap-3 md:flex-row">
-        <input
-          type="url"
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-          placeholder="https://yritys.fi"
-          className="min-h-13 w-full rounded-full border border-white/10 bg-black/20 px-5 text-sm text-white outline-none placeholder:text-white/35"
-        />
+      <div className="mt-8 space-y-4">
+        <div className="flex flex-col gap-3 md:flex-row">
+          <input
+            type="url"
+            value={url}
+            onChange={(event) => setUrl(event.target.value)}
+            placeholder="https://yritys.fi"
+            className="min-h-13 w-full rounded-full border border-white/10 bg-black/20 px-5 text-sm text-white outline-none placeholder:text-white/35"
+          />
 
-        <Link
-          href={generatedHref}
-          aria-disabled={!isValid}
-          className={`flex min-h-13 shrink-0 items-center justify-center rounded-full px-6 text-sm font-semibold transition md:min-w-[220px] ${
-            isValid
-              ? "bg-sky-300 text-slate-950 hover:opacity-90"
-              : "pointer-events-none cursor-not-allowed bg-white/10 text-white/40"
-          }`}
-        >
-          {buttonLabel}
-        </Link>
+          <Link
+            href={generatedHref}
+            aria-disabled={!isValid}
+            className={`flex min-h-13 shrink-0 items-center justify-center rounded-full px-6 text-sm font-semibold transition md:min-w-[220px] ${
+              isValid
+                ? "bg-sky-300 text-slate-950 hover:opacity-90"
+                : "pointer-events-none cursor-not-allowed bg-white/10 text-white/40"
+            }`}
+          >
+            {buttonLabel}
+          </Link>
+        </div>
+
+        <div className="rounded-[1.5rem] border border-white/10 bg-black/10 p-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+            Valitse tyylisuunta
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-3">
+            {PRESET_ORDER.map((presetId) => {
+              const preset = STYLE_PRESETS[presetId];
+              const isActive = presetId === stylePreset;
+
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => setStylePreset(preset.id)}
+                  className={
+                    isActive
+                      ? "rounded-full bg-sky-300 px-4 py-2 text-sm font-semibold text-slate-950"
+                      : "rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/85 transition hover:bg-white/10"
+                  }
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="mt-4 text-sm leading-7 text-white/70">
+            Valittu suunta:{" "}
+            <span className="font-semibold text-white">{activePreset.label}</span>.
+            {" "}{activePreset.description}
+          </p>
+        </div>
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-xs leading-6 text-white/55">
         {isValid
-          ? "URL näyttää kelvolliselta. Generate concept vie nyt suoraan mock-generointiin tällä osoitteella."
+          ? "URL näyttää kelvolliselta. Generate concept vie mock-generointiin valitulla URL:lla ja tyylisuunnalla."
           : "Anna kelvollinen http:// tai https:// alkava URL, jotta voit jatkaa mock-generointiin."}
       </div>
 
