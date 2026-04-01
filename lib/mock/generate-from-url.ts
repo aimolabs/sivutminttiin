@@ -1,4 +1,5 @@
 import type { Project } from "./projects";
+import type { StylePresetId } from "./style-presets";
 
 function extractDomain(url: string): string {
   try {
@@ -31,11 +32,12 @@ function buildBusinessSummary(companyName: string, domain: string): string {
 export function generateProjectFromUrl(url: string): Project {
   const domain = extractDomain(url);
   const companyName = domainToCompanyName(domain);
+  const stylePreset: StylePresetId = "premium-dark";
 
   return {
     id: "generated",
     siteProfile: {
-      domain: new URL(url).hostname.replace(/^www\./, ""),
+      domain,
       companyName,
       industry: "Paikallinen palveluyritys",
       audience: "Paikalliset asiakkaat",
@@ -90,8 +92,7 @@ export function generateProjectFromUrl(url: string): Project {
       }
     ],
     redesign: {
-      styleDirection:
-        "Selkeä, moderni ja luottamusta rakentava palveluyrityksen etusivu, jossa viesti, rakenne ja toimintakehotteet tukevat myyntiä.",
+      stylePreset,
       sections: [
         {
           type: "hero",

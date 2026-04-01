@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/projects/status-badge";
 import { ProjectAuditGrid } from "@/components/projects/project-audit-grid";
 import { ProjectSummaryCard } from "@/components/projects/project-summary-card";
 import { generateProjectFromUrl } from "@/lib/mock/generate-from-url";
+import { STYLE_PRESETS } from "@/lib/mock/style-presets";
 
 type GeneratedProjectPageProps = {
   searchParams: Promise<{
@@ -22,6 +23,7 @@ export default async function GeneratedProjectPage({
   }
 
   const project = generateProjectFromUrl(url);
+  const stylePreset = STYLE_PRESETS[project.redesign.stylePreset];
 
   return (
     <main className="min-h-screen">
@@ -102,7 +104,7 @@ export default async function GeneratedProjectPage({
             Style direction
           </p>
           <p className="mt-4 max-w-3xl text-base leading-7 text-white/75">
-            {project.redesign.styleDirection}
+            {stylePreset.description}
           </p>
         </section>
       </div>
