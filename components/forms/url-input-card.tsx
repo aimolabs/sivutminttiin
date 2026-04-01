@@ -1,13 +1,17 @@
+import { MockGenerateActions } from "@/components/forms/mock-generate-actions";
+
 type UrlInputCardProps = {
   title?: string;
   description?: string;
   buttonLabel?: string;
+  mockUrl?: string;
 };
 
 export function UrlInputCard({
   title = "Luo uusi redesign-projekti",
   description = "Syötä yrityksen nettisivun osoite. Ensimmäisessä versiossa tämä on vielä käyttöliittymätason mock, ei oikea analyysi.",
-  buttonLabel = "Generate concept"
+  buttonLabel = "Generate concept",
+  mockUrl = "https://example-company.fi"
 }: UrlInputCardProps) {
   return (
     <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur md:p-8">
@@ -26,19 +30,26 @@ export function UrlInputCard({
       <div className="mt-8 flex flex-col gap-3 md:flex-row">
         <input
           type="url"
+          defaultValue={mockUrl}
           placeholder="https://yritys.fi"
           className="min-h-13 w-full rounded-full border border-white/10 bg-black/20 px-5 text-sm text-white outline-none placeholder:text-white/35"
         />
 
-        <button className="min-h-13 shrink-0 rounded-full bg-sky-300 px-6 text-sm font-semibold text-slate-950 transition hover:opacity-90">
+        <button
+          type="button"
+          className="min-h-13 shrink-0 rounded-full bg-sky-300 px-6 text-sm font-semibold text-slate-950 transition hover:opacity-90"
+        >
           {buttonLabel}
         </button>
       </div>
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-3 text-xs leading-6 text-white/55">
-        Seuraavassa vaiheessa tämä kytketään oikeaan URL-fetch + parsing + AI-analysis
-        -putkeen. Nyt rakennamme ensin käyttöliittymän, flow’n ja preview-rakenteen.
+        Tässä vaiheessa nappi ei vielä suorita oikeaa analyysiä. Alla oleva mock-flow
+        vie seuraavaan näkymään, jossa esitellään miten URL käsiteltäisiin ennen
+        varsinaisen projektin luontia.
       </div>
+
+      <MockGenerateActions url={mockUrl} />
     </section>
   );
 }

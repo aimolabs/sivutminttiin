@@ -15,6 +15,13 @@ export function SiteHeader() {
           >
             Projektit
           </Link>
+
+          <Link
+            href="/projects/new"
+            className="rounded-full bg-sky-300 px-4 py-2 font-semibold text-slate-950 transition hover:opacity-90"
+          >
+            Uusi projekti
+          </Link>
         </nav>
       </div>
     </header>
