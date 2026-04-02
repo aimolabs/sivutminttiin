@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PreviewSectionRenderer } from "@/components/projects/preview-section-renderer";
-import { generateProjectFromUrl } from "@/lib/mock/generate-from-url";
+import { buildProjectFromSourceSnapshot } from "@/lib/mock/generate-from-url";
+import { fetchSourceSnapshot } from "@/lib/source/fetch-source-snapshot";
 
 type GeneratedPreviewPageProps = {
   searchParams: Promise<{
@@ -19,7 +20,8 @@ export default async function GeneratedPreviewPage({
     notFound();
   }
 
-  const project = generateProjectFromUrl(url, { stylePreset });
+  const snapshot = await fetchSourceSnapshot(url);
+  const project = buildProjectFromSourceSnapshot(snapshot, { stylePreset });
 
   return (
     <main className="min-h-screen bg-[#0b1020] px-6 py-10 text-white md:px-10">

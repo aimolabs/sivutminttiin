@@ -4,15 +4,8 @@ import { resolveIndustryProfile } from "./industry-profiles";
 import { applyStylePresetToContent } from "./apply-style-preset";
 import { buildSectionPlan } from "./section-plans";
 import { getIndustryAudit } from "./industry-audit";
-
-function extractDomain(url: string): string {
-  try {
-    const hostname = new URL(url).hostname;
-    return hostname.replace(/^www\./, "");
-  } catch {
-    return "tuntematon.fi";
-  }
-}
+import type { SourceSnapshot } from "../source/source-snapshot";
+import { fetchSourceSnapshot } from "../source/fetch-source-snapshot";
 
 function domainToCompanyName(domain: string): string {
   const withoutTld = domain.replace(/\.[^.]+$/, "");
@@ -29,10 +22,6 @@ function domainToCompanyName(domain: string): string {
     .join(" ");
 }
 
-function buildBusinessSummary(companyName: string, domain: string): string {
-  return `${companyName} (${domain}) näyttää tällä hetkellä enemmän tekniseltä olemassaololta kuin selkeältä myyntisivulta. Uudistetun konseptin tavoite on tehdä palvelu ymmärrettäväksi nopeasti, vahvistaa luottamusta ja ohjata kävijä yhteen selkeään seuraavaan toimintaan.`;
-}
-
 function resolveStylePreset(input?: string): StylePresetId {
   switch (input) {
     case "minimal-trust":
@@ -45,15 +34,81 @@ function resolveStylePreset(input?: string): StylePresetId {
   }
 }
 
-export function generateProjectFromUrl(
-  url: string,
+function resolveCompanyName(snapshot: SourceSnapshot): string {
+  const fromH1 = snapshot.h1.trim();
+
+  if (fromH1 && fromH1.length <= 60) {
+    return fromH1;
+  }
+
+  const titleCandidate = snapshot.pageTitle
+    .split(/\s[|–—-]\s/)
+    .map((part) => part.trim())
+    .find((part) => part.length >= 2 && part.length <= 60);
+
+  if (titleCandidate) {
+    return titleCandidate;
+  }
+
+  return domainToCompanyName(snapshot.domain);
+}
+
+function buildBusinessSummary(
+  snapshot: SourceSnapshot,
+  companyName: string
+): string {
+  const parts: string[] = [];
+
+  if (snapshot.pageTitle) {
+    parts.push(
+      `Nykyinen sivu viestii tällä hetkellä otsikolla "${snapshot.pageTitle}".`
+    );
+  }
+
+  if (snapshot.metaDescription) {
+    parts.push(
+      `Meta-kuvauksen perusteella ${companyName} painottaa tällä hetkellä viestiä "${snapshot.metaDescription}".`
+    );
+  } else if (snapshot.h1) {
+    parts.push(
+      `Etusivun pääotsikko näyttää tällä hetkellä olevan "${snapshot.h1}".`
+    );
+  }
+
+  parts.push(
+    "Uudistetun konseptin tavoite on tehdä arvolupaus selkeämmäksi, nostaa luottamusta ja ohjata kävijä nopeammin oikeaan seuraavaan toimintaan."
+  );
+
+  return parts.join(" ");
+}
+
+function buildSourceCorpus(snapshot: SourceSnapshot): string {
+  return [
+    snapshot.domain,
+    snapshot.pageTitle,
+    snapshot.metaDescription,
+    snapshot.h1,
+    ...snapshot.h2s,
+    ...snapshot.navItems,
+    ...snapshot.ctaTexts,
+    snapshot.bodyText.slice(0, 500)
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
+export function buildProjectFromSourceSnapshot(
+  snapshot: SourceSnapshot,
   options?: { stylePreset?: string }
 ): Project {
-  const domain = extractDomain(url);
-  const companyName = domainToCompanyName(domain);
+  const companyName = resolveCompanyName(snapshot);
   const stylePreset = resolveStylePreset(options?.stylePreset);
-  const industryProfile = resolveIndustryProfile(domain);
-  const industryAudit = getIndustryAudit(industryProfile.label.toLowerCase(), companyName);
+  const sourceCorpus = buildSourceCorpus(snapshot);
+  const industryProfile = resolveIndustryProfile(sourceCorpus);
+  const industryAudit = getIndustryAudit(
+    industryProfile.label.toLowerCase(),
+    companyName
+  );
 
   const baseAboutBody =
     "Konsepti tekee sivusta myynnillisesti terävämmän. Kävijä näkee nopeammin mitä tarjotaan, miksi siihen kannattaa luottaa ja mitä seuraavaksi kannattaa tehdä. Näin etusivu ei jää vain käyntikortiksi, vaan alkaa ohjata toimintaa.";
@@ -63,7 +118,8 @@ export function generateProjectFromUrl(
     companyName,
     industryLabel: industryProfile.label,
     baseHeadline: industryProfile.heroHeadlineTemplate(companyName),
-    baseSubheadline: industryProfile.heroSubheadline,
+    baseSubheadline:
+      snapshot.metaDescription || snapshot.h1 || industryProfile.heroSubheadline,
     baseAboutBody
   });
 
@@ -73,13 +129,23 @@ export function generateProjectFromUrl(
     headline: presetContent.heroHeadline,
     subheadline: presetContent.heroSubheadline,
     primaryCta: presetContent.primaryCta,
-    secondaryCta: presetContent.secondaryCta
+    secondaryCta:
+      snapshot.ctaTexts[0] && snapshot.ctaTexts[0].length <= 28
+        ? snapshot.ctaTexts[0]
+        : presetContent.secondaryCta
   };
 
   const servicesSection = {
     type: "services" as const,
     title: industryProfile.serviceSectionTitle,
-    items: industryProfile.serviceItems
+    items:
+      snapshot.h2s.length >= 3
+        ? snapshot.h2s.slice(0, 3).map((heading) => ({
+            title: heading,
+            description:
+              "Tämä teema nousi nykyiseltä sivulta näkyviin, mutta tarvitsee selkeämmän kaupallisen esitystavan redesign-konseptissa."
+          }))
+        : industryProfile.serviceItems
   };
 
   const aboutSection = {
@@ -94,13 +160,13 @@ export function generateProjectFromUrl(
     items: [
       {
         quote:
-          "Selkeämpi rakenne ja vahvempi viesti tekevät yrityksestä heti ammattimaisemman oloisen.",
-        name: "Konseptihavainto 1"
+          "Nykyiseltä sivulta löytyy jo aineksia uskottavaan esitystapaan, mutta rakenne ei vielä tue niitä riittävän hyvin.",
+        name: "Snapshot-havainto 1"
       },
       {
         quote:
-          "Kun CTA, palvelut ja luottamussignaalit ovat näkyvissä, sivu alkaa näyttää oikealta myyntityökalulta.",
-        name: "Konseptihavainto 2"
+          "Kun nykyisen sivun viesti jäsennellään selkeämmin, kokonaisuus alkaa näyttää enemmän myyntityökalulta kuin pelkältä verkkoläsnäololta.",
+        name: "Snapshot-havainto 2"
       }
     ]
   };
@@ -109,7 +175,10 @@ export function generateProjectFromUrl(
     type: "cta" as const,
     title: industryProfile.ctaTitle,
     body: industryProfile.ctaBody,
-    button: presetContent.primaryCta
+    button:
+      snapshot.ctaTexts[0] && snapshot.ctaTexts[0].length <= 24
+        ? snapshot.ctaTexts[0]
+        : presetContent.primaryCta
   };
 
   const sections = buildSectionPlan(stylePreset, {
@@ -123,16 +192,16 @@ export function generateProjectFromUrl(
   return {
     id: "generated",
     siteProfile: {
-      domain,
+      domain: snapshot.domain,
       companyName,
       industry: industryProfile.label,
       audience: industryProfile.audience,
       tone: industryProfile.tone
     },
-    sourceUrl: url,
-    status: "draft",
+    sourceUrl: snapshot.sourceUrl,
+    status: snapshot.fetchStatus === "live" ? "ready" : "draft",
     createdAt: new Date().toISOString().slice(0, 10),
-    businessSummary: buildBusinessSummary(companyName, domain),
+    businessSummary: buildBusinessSummary(snapshot, companyName),
     auditIssues: industryAudit.auditIssues,
     suggestedSections: industryAudit.suggestedSections,
     redesign: {
@@ -140,4 +209,12 @@ export function generateProjectFromUrl(
       sections
     }
   };
+}
+
+export async function generateProjectFromUrl(
+  url: string,
+  options?: { stylePreset?: string }
+): Promise<Project> {
+  const snapshot = await fetchSourceSnapshot(url);
+  return buildProjectFromSourceSnapshot(snapshot, options);
 }
