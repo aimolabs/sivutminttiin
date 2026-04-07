@@ -9,4 +9,8 @@ export type SourceSnapshot = {
   navItems: string[];
   ctaTexts: string[];
   bodyText: string;
+  siteName: string;
+  themeColor: string;
+  ogImageUrl: string;
+  iconUrl: string;
 };

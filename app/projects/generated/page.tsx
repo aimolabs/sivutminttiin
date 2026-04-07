@@ -1,4 +1,3 @@
-import { vrsyProject } from "@/lib/mock/projects/vrsy-demo";
 import { generateProjectFromUrl } from "@/lib/mock/generate-from-url";
 import { PreviewSectionRenderer } from "@/components/projects/preview-section-renderer";
 import { CompanyBriefDebug } from "@/components/projects/company-brief-debug";

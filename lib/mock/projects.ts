@@ -19,6 +19,13 @@ export type SiteProfile = {
   tone: string;
 };
 
+export type SourceBrand = {
+  siteName?: string;
+  themeColor?: string;
+  ogImageUrl?: string;
+  iconUrl?: string;
+};
+
 export type StyleDirection = {
   stylePresetId: StylePresetId;
   visualTone: string;
@@ -250,6 +257,7 @@ export type Project = {
   createdAt: string;
   businessSummary: string;
   companyBrief?: CompanyBrief;
+  sourceBrand?: SourceBrand;
   auditIssues: AuditIssue[];
   suggestedSections: SuggestedSection[];
   styleDirection: StyleDirection;

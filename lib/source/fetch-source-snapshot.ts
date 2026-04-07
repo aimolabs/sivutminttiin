@@ -9,6 +9,14 @@ function extractDomain(url: string): string {
   }
 }
 
+function toAbsoluteUrl(baseUrl: string, maybeRelative: string): string {
+  try {
+    return new URL(maybeRelative, baseUrl).toString();
+  } catch {
+    return "";
+  }
+}
+
 function decodeHtml(value: string): string {
   return value
     .replace(/&amp;/g, "&")
@@ -28,6 +36,52 @@ function cleanText(value: string): string {
 function extractFirst(html: string, regex: RegExp): string {
   const match = html.match(regex);
   return match?.[1] ? cleanText(match[1]) : "";
+}
+
+function extractMetaContent(html: string, names: string[]): string {
+  for (const name of names) {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const patterns = [
+      new RegExp(
+        `<meta[^>]+(?:name|property)=["']${escaped}["'][^>]+content=["']([\\s\\S]*?)["'][^>]*>`,
+        "i"
+      ),
+      new RegExp(
+        `<meta[^>]+content=["']([\\s\\S]*?)["'][^>]+(?:name|property)=["']${escaped}["'][^>]*>`,
+        "i"
+      )
+    ];
+
+    for (const pattern of patterns) {
+      const value = extractFirst(html, pattern);
+      if (value) {
+        return value;
+      }
+    }
+  }
+
+  return "";
+}
+
+function extractLinkHref(
+  html: string,
+  relMatchers: string[],
+  baseUrl: string
+): string {
+  const linkRegex = /<link[^>]*>/gi;
+
+  for (const tag of html.match(linkRegex) ?? []) {
+    const rel = extractFirst(tag, /rel=["']([\s\S]*?)["']/i).toLowerCase();
+    const href = extractFirst(tag, /href=["']([\s\S]*?)["']/i);
+
+    if (!rel || !href) continue;
+
+    if (relMatchers.some((matcher) => rel.includes(matcher))) {
+      return toAbsoluteUrl(baseUrl, href);
+    }
+  }
+
+  return "";
 }
 
 function extractAll(html: string, regex: RegExp, maxItems = 8): string[] {
@@ -80,7 +134,11 @@ function fallbackSnapshot(url: string): SourceSnapshot {
     h2s: [],
     navItems: [],
     ctaTexts: [],
-    bodyText: ""
+    bodyText: "",
+    siteName: "",
+    themeColor: "",
+    ogImageUrl: "",
+    iconUrl: ""
   };
 }
 
@@ -111,15 +169,26 @@ export async function fetchSourceSnapshot(url: string): Promise<SourceSnapshot> 
     const html = await response.text();
 
     const pageTitle = extractFirst(html, /<title[^>]*>([\s\S]*?)<\/title>/i);
-    const metaDescription = extractFirst(
-      html,
-      /<meta[^>]+name=["']description["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i
-    );
+    const metaDescription = extractMetaContent(html, [
+      "description",
+      "og:description"
+    ]);
     const h1 = extractFirst(html, /<h1[^>]*>([\s\S]*?)<\/h1>/i);
     const h2s = extractAll(html, /<h2[^>]*>([\s\S]*?)<\/h2>/gi, 6);
     const buttonTexts = extractAll(html, /<button[^>]*>([\s\S]*?)<\/button>/gi, 10);
     const linkTexts = extractAll(html, /<a[^>]*>([\s\S]*?)<\/a>/gi, 24);
     const bodyText = stripHtmlToText(html).slice(0, 2200);
+
+    const siteName =
+      extractMetaContent(html, ["og:site_name", "application-name"]) || pageTitle;
+
+    const themeColor = extractMetaContent(html, ["theme-color", "msapplication-TileColor"]);
+
+    const ogImageRaw = extractMetaContent(html, ["og:image", "twitter:image"]);
+    const ogImageUrl = ogImageRaw ? toAbsoluteUrl(url, ogImageRaw) : "";
+
+    const iconUrl =
+      extractLinkHref(html, ["icon", "shortcut icon", "apple-touch-icon"], url) || "";
 
     return {
       sourceUrl: url,
@@ -131,7 +200,11 @@ export async function fetchSourceSnapshot(url: string): Promise<SourceSnapshot> 
       h2s,
       navItems: pickNavItems(linkTexts),
       ctaTexts: pickCtas(buttonTexts, linkTexts),
-      bodyText
+      bodyText,
+      siteName,
+      themeColor,
+      ogImageUrl,
+      iconUrl
     };
   } catch {
     return fallbackSnapshot(url);

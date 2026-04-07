@@ -586,6 +586,12 @@ const companyBrief = fallbackCompanyBrief;
     createdAt: new Date().toISOString().slice(0, 10),
     businessSummary: buildBusinessSummary(snapshot, companyName),
     companyBrief,
+    sourceBrand: {
+      siteName: snapshot.siteName,
+      themeColor: snapshot.themeColor,
+      ogImageUrl: snapshot.ogImageUrl,
+      iconUrl: snapshot.iconUrl
+    },
     auditIssues: sourceAnalysis.auditIssues,
     suggestedSections: sourceAnalysis.suggestedSections,
     styleDirection,

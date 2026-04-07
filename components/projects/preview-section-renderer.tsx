@@ -1,4 +1,4 @@
-import { Project, ProjectSection, TrustItem } from "@/lib/mock/projects";
+import { Project, ProjectSection } from "@/lib/mock/projects";
 import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type Props = {
@@ -40,18 +40,107 @@ function getSecondaryCta(project: Project, section?: ProjectSection) {
   return resolveCtas(project, section)[1] ?? null;
 }
 
-function renderPrimaryButton(
-  label: string,
-  primaryButtonClasses: string
-) {
+function renderPrimaryButton(label: string, primaryButtonClasses: string) {
   return <span className={primaryButtonClasses}>{label}</span>;
 }
 
-function renderSecondaryButton(
-  label: string,
-  secondaryButtonClasses: string
-) {
+function renderSecondaryButton(label: string, secondaryButtonClasses: string) {
   return <span className={secondaryButtonClasses}>{label}</span>;
+}
+
+function BrandVisual({
+  project,
+  subtleClasses,
+  surfaceClasses,
+  sectionBorderClasses
+}: {
+  project: Project;
+  subtleClasses: string;
+  surfaceClasses: string;
+  sectionBorderClasses: string;
+}) {
+  const imageUrl = project.sourceBrand?.ogImageUrl;
+  const iconUrl = project.sourceBrand?.iconUrl;
+  const siteName =
+    project.sourceBrand?.siteName || project.siteProfile.companyName;
+  const themeColor = project.sourceBrand?.themeColor || "#1d4ed8";
+
+  if (imageUrl) {
+    return (
+      <div className="space-y-4">
+        <div
+          className={`overflow-hidden rounded-[2rem] p-2 ${surfaceClasses}`}
+          style={{
+            boxShadow: `0 0 0 1px ${themeColor}22, 0 24px 80px ${themeColor}18`
+          }}
+        >
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem]">
+            <img
+              src={imageUrl}
+              alt={siteName}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+          </div>
+        </div>
+
+        <div className={`rounded-[1.5rem] p-5 ${surfaceClasses}`}>
+          <div className="flex items-center gap-3">
+            {iconUrl ? (
+              <img
+                src={iconUrl}
+                alt=""
+                className="h-10 w-10 rounded-xl bg-white object-contain p-1"
+              />
+            ) : (
+              <div
+                className="h-10 w-10 rounded-xl"
+                style={{ backgroundColor: themeColor }}
+              />
+            )}
+
+            <div className="space-y-1">
+              <p className={`text-xs uppercase tracking-[0.18em] ${subtleClasses}`}>
+                Source brand
+              </p>
+              <p className="text-sm font-medium">{siteName}</p>
+            </div>
+          </div>
+
+          <div className={`mt-4 border-t pt-4 ${sectionBorderClasses}`}>
+            <p className={`text-xs uppercase tracking-[0.16em] ${subtleClasses}`}>
+              Hero visual preserved from source
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`rounded-[2rem] p-6 md:p-7 ${surfaceClasses}`}
+      style={{
+        background:
+          `radial-gradient(circle at top right, ${themeColor}22, transparent 55%)`
+      }}
+    >
+      <div className="space-y-5">
+        <div className="space-y-2">
+          <p className={`text-xs uppercase tracking-[0.18em] ${subtleClasses}`}>
+            Miksi tämä toimii
+          </p>
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Luotettava ensivaikutelma heti
+          </h2>
+          <p className="text-sm leading-6 text-inherit/70">
+            Rakennus- ja remonttisivun tärkein tehtävä on tehdä palvelu,
+            luotettavuus ja tarjouspyynnön helppous näkyviksi ilman epävarmuutta.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function ContractorHomeLayout({
@@ -86,7 +175,7 @@ function ContractorHomeLayout({
   return (
     <div className="space-y-20 md:space-y-24">
       {heroSection ? (
-        <section className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
+        <section className="grid gap-10 md:grid-cols-[1.02fr_0.98fr] md:items-center">
           <div className="space-y-6">
             {heroSection.eyebrow ? (
               <p className={`text-sm uppercase tracking-[0.22em] ${subtleClasses}`}>
@@ -110,49 +199,12 @@ function ContractorHomeLayout({
             </div>
           </div>
 
-          <div className={`rounded-[2rem] p-6 md:p-7 ${surfaceClasses}`}>
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <p className={`text-xs uppercase tracking-[0.18em] ${subtleClasses}`}>
-                  Miksi tämä toimii
-                </p>
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  Luotettava ensivaikutelma heti
-                </h2>
-                <p className={`text-sm leading-6 ${bodyMutedClasses}`}>
-                  Rakennus- ja remonttisivun tärkein tehtävä on tehdä palvelu,
-                  luotettavuus ja tarjouspyynnön helppous näkyviksi ilman epävarmuutta.
-                </p>
-              </div>
-
-              <div className={`grid gap-3 border-t pt-5 ${sectionBorderClasses}`}>
-                <div className="grid gap-1">
-                  <p className={`text-xs uppercase tracking-[0.16em] ${subtleClasses}`}>
-                    Audience
-                  </p>
-                  <p className="text-sm font-medium">{project.siteProfile.audience}</p>
-                </div>
-
-                <div className="grid gap-1">
-                  <p className={`text-xs uppercase tracking-[0.16em] ${subtleClasses}`}>
-                    Core offer
-                  </p>
-                  <p className="text-sm font-medium">
-                    {project.companyBrief?.coreOffer.title ?? project.pages[0]?.pageSEO.primaryTopic}
-                  </p>
-                </div>
-
-                <div className="grid gap-1">
-                  <p className={`text-xs uppercase tracking-[0.16em] ${subtleClasses}`}>
-                    CTA focus
-                  </p>
-                  <p className="text-sm font-medium">
-                    {project.companyBrief?.primaryCTALabel ?? "Pyydä tarjous"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <BrandVisual
+            project={project}
+            subtleClasses={subtleClasses}
+            surfaceClasses={surfaceClasses}
+            sectionBorderClasses={sectionBorderClasses}
+          />
         </section>
       ) : null}
 
@@ -229,13 +281,17 @@ function ContractorHomeLayout({
           </div>
 
           <div className="grid gap-4">
-            {(trustItems.length > 0 ? trustItems : [
-              {
-                id: "fallback-1",
-                title: "Luotettava toteutus",
-                body: project.companyBrief?.trustStrategy ?? "Luottamus rakennetaan selkeän toimintatavan ja matalan yhteydenottokynnyksen varaan."
-              }
-            ]).map((item) => (
+            {(trustItems.length > 0
+              ? trustItems
+              : [
+                  {
+                    id: "fallback-1",
+                    title: "Luotettava toteutus",
+                    body:
+                      project.companyBrief?.trustStrategy ??
+                      "Luottamus rakennetaan selkeän toimintatavan ja matalan yhteydenottokynnyksen varaan."
+                  }
+                ]).map((item) => (
               <div key={item.id} className={`rounded-[1.5rem] p-6 ${surfaceClasses}`}>
                 {item.body ? (
                   <p className={`text-base leading-7 ${bodyMutedClasses}`}>{item.body}</p>
@@ -690,6 +746,8 @@ export function PreviewSectionRenderer({ project, pageId }: Props) {
   const preset = STYLE_PRESETS[stylePresetId];
   const isDark = preset.visual.theme === "dark";
 
+  const themeColor = project.sourceBrand?.themeColor || "#2563eb";
+
   const shellClasses = isDark
     ? "overflow-hidden rounded-[2.5rem] border border-white/10 bg-neutral-950 text-white shadow-[0_20px_80px_rgba(0,0,0,0.35)]"
     : "overflow-hidden rounded-[2.5rem] border border-neutral-200 bg-white text-neutral-950 shadow-[0_20px_80px_rgba(0,0,0,0.08)]";
@@ -717,8 +775,8 @@ export function PreviewSectionRenderer({ project, pageId }: Props) {
     preset.copy.ctaStyle === "aggressive"
       ? "inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white"
       : isDark
-        ? "inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-black"
-        : "inline-flex items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white";
+        ? "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold text-black"
+        : "inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold text-white";
 
   const secondaryButtonClasses = isDark
     ? "inline-flex items-center justify-center rounded-full border border-white/15 bg-white/[0.03] px-5 py-3 text-sm font-medium text-white"
@@ -739,16 +797,32 @@ export function PreviewSectionRenderer({ project, pageId }: Props) {
     .find((section) => section.type === "cta");
 
   return (
-    <div className={shellClasses}>
+    <div
+      className={shellClasses}
+      style={{
+        backgroundImage: isDark
+          ? `radial-gradient(circle at top right, ${themeColor}22, transparent 35%)`
+          : undefined
+      }}
+    >
       <div className={topBarClasses}>
         <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-4 md:px-8">
           <div className="space-y-1">
             <p className={`text-xs uppercase tracking-[0.24em] ${subtleClasses}`}>
               {project.siteProfile.industry}
             </p>
-            <p className="text-lg font-semibold tracking-tight">
-              {project.siteProfile.companyName}
-            </p>
+            <div className="flex items-center gap-3">
+              {project.sourceBrand?.iconUrl ? (
+                <img
+                  src={project.sourceBrand.iconUrl}
+                  alt=""
+                  className="h-7 w-7 rounded-md bg-white object-contain p-1"
+                />
+              ) : null}
+              <p className="text-lg font-semibold tracking-tight">
+                {project.sourceBrand?.siteName || project.siteProfile.companyName}
+              </p>
+            </div>
           </div>
 
           <nav className="flex flex-wrap items-center gap-4 md:gap-6">
