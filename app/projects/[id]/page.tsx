@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/projects/status-badge";
 import { ProjectSummaryCard } from "@/components/projects/project-summary-card";
 import { ProjectAuditGrid } from "@/components/projects/project-audit-grid";
 import { ProjectPreview } from "@/components/projects/project-preview";
+import { CompanyBriefDebug } from "@/components/projects/company-brief-debug";
 
 type Props = {
   params: { id: string };
@@ -26,6 +27,8 @@ export default function ProjectPage({ params }: Props) {
       </div>
 
       <ProjectSummaryCard project={project} />
+
+      <CompanyBriefDebug project={project} />
 
       <ProjectAuditGrid project={project} />
 

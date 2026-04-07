@@ -1,5 +1,6 @@
 import { generateProjectFromUrl } from "@/lib/mock/generate-from-url";
 import { PreviewSectionRenderer } from "@/components/projects/preview-section-renderer";
+import { CompanyBriefDebug } from "@/components/projects/company-brief-debug";
 
 type SearchParams = Promise<{
   url?: string;
@@ -32,6 +33,8 @@ export default async function GeneratedPreviewPage({ searchParams }: Props) {
         </h1>
         <p className="max-w-3xl text-neutral-600">{project.businessSummary}</p>
       </div>
+
+      <CompanyBriefDebug project={project} />
 
       <div className="rounded-[2rem] border border-neutral-200 bg-neutral-50 p-5 md:p-6">
         <div className="space-y-4 rounded-[1.5rem] border border-neutral-200 bg-white p-5">
