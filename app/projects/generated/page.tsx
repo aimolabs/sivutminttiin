@@ -173,6 +173,57 @@ export default async function GeneratedProjectPage({
 
         <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
           <p className="text-sm uppercase tracking-[0.24em] text-sky-300/80">
+            SEO foundation
+          </p>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+                Site name
+              </p>
+              <p className="mt-3 text-sm leading-7 text-white/80">
+                {project.siteSEO.siteName}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+                Canonical domain
+              </p>
+              <p className="mt-3 text-sm leading-7 text-white/80">
+                {project.siteSEO.canonicalDomain}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            {project.pages.map((page) => (
+              <div
+                key={page.pageId}
+                className="rounded-2xl border border-white/10 bg-black/10 p-4"
+              >
+                <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+                  {page.pageType}
+                </p>
+                <p className="mt-2 text-base font-semibold text-white">
+                  {page.pageSEO.title}
+                </p>
+                <p className="mt-2 text-sm text-white/70">
+                  {page.pageSEO.slug}
+                </p>
+                <p className="mt-2 text-sm leading-7 text-white/80">
+                  {page.pageSEO.metaDescription}
+                </p>
+                <p className="mt-2 text-sm text-white/60">
+                  H1: {page.pageSEO.h1}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+          <p className="text-sm uppercase tracking-[0.24em] text-sky-300/80">
             Observed signals
           </p>
 

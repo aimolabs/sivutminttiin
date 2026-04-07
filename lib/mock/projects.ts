@@ -66,6 +66,36 @@ export type RedesignSection =
 
 export type PageType = "home" | "about" | "services" | "contact";
 
+export type SiteSEO = {
+  siteName: string;
+  titleSuffix: string;
+  titlePattern: string;
+  defaultMetaDescription: string;
+  canonicalDomain: string;
+  robotsDefault: string;
+  sitemapEnabled: boolean;
+  schemaProfileType: string;
+  schemaProfileName: string;
+  schemaProfileDescription: string;
+};
+
+export type PageSEO = {
+  pageId: string;
+  pageType: PageType;
+  pagePurpose: string;
+  searchIntent: string;
+  primaryTopic: string;
+  secondaryTopics: string[];
+  slug: string;
+  title: string;
+  metaDescription: string;
+  h1: string;
+  canonicalPath: string;
+  indexable: boolean;
+  schemaType: string;
+  internalLinkTargets: string[];
+};
+
 export type SitemapItem = {
   pageId: string;
   slug: string;
@@ -78,6 +108,7 @@ export type SitemapItem = {
 };
 
 export type ProjectPage = SitemapItem & {
+  pageSEO: PageSEO;
   sections: RedesignSection[];
 };
 
@@ -91,6 +122,7 @@ export type Project = {
   auditIssues: AuditIssue[];
   suggestedSections: SuggestedSection[];
   styleDirection: StyleDirection;
+  siteSEO: SiteSEO;
   sitemap: SitemapItem[];
   pages: ProjectPage[];
 };
@@ -157,6 +189,20 @@ export const mockProjects: Project[] = [
       layoutDirection: "brand-forward",
       interactionMood: "confident"
     },
+    siteSEO: {
+      siteName: "Rakennus Laine",
+      titleSuffix: " | Rakennus Laine",
+      titlePattern: "%PAGE_TITLE% | Rakennus Laine",
+      defaultMetaDescription:
+        "Rakennus Laine tarjoaa remontti- ja rakennuspalveluita selkeästi, luotettavasti ja yhteydenottoon ohjaavasti.",
+      canonicalDomain: "https://rakennuslaine.fi",
+      robotsDefault: "index,follow",
+      sitemapEnabled: true,
+      schemaProfileType: "LocalBusiness",
+      schemaProfileName: "Rakennus Laine",
+      schemaProfileDescription:
+        "Paikallinen rakennus- ja remonttipalvelu kotitalouksille ja kiinteistöjen omistajille."
+    },
     sitemap: [
       {
         pageId: "home",
@@ -209,6 +255,23 @@ export const mockProjects: Project[] = [
         navigationLabel: "Etusivu",
         navVisible: true,
         footerVisible: true,
+        pageSEO: {
+          pageId: "home",
+          pageType: "home",
+          pagePurpose: "Esittele pääarvolupaus, palvelut ja ensisijainen CTA",
+          searchIntent: "local service homepage",
+          primaryTopic: "Rakennus- ja remonttipalvelut",
+          secondaryTopics: ["kylpyhuoneremontit", "keittiöremontit", "pienrakentaminen"],
+          slug: "/",
+          title: "Rakennus ja remontointi Uudellamaalla",
+          metaDescription:
+            "Rakennus Laine tarjoaa remontti- ja rakennuspalveluita Uudellamaalla. Tutustu palveluihin ja pyydä tarjous helposti.",
+          h1: "Luotettava tekijä remontteihin ja rakennustöihin Uudellamaalla.",
+          canonicalPath: "/",
+          indexable: true,
+          schemaType: "WebPage",
+          internalLinkTargets: ["/palvelut", "/yritys", "/yhteys"]
+        },
         sections: [
           {
             type: "hero",
@@ -281,6 +344,23 @@ export const mockProjects: Project[] = [
         navigationLabel: "Yritys",
         navVisible: true,
         footerVisible: true,
+        pageSEO: {
+          pageId: "about",
+          pageType: "about",
+          pagePurpose: "Rakenna luottamusta ja kerro yrityksestä",
+          searchIntent: "company credibility",
+          primaryTopic: "Rakennus Laine yrityksenä",
+          secondaryTopics: ["kokemus", "toimintatapa", "luotettavuus"],
+          slug: "/yritys",
+          title: "Rakennus Laine yrityksenä",
+          metaDescription:
+            "Tutustu Rakennus Laineen toimintatapaan, kokemukseen ja siihen, miksi yritys on luotettava valinta remontti- ja rakennustöihin.",
+          h1: "Rakennus Laine yrityksenä",
+          canonicalPath: "/yritys",
+          indexable: true,
+          schemaType: "AboutPage",
+          internalLinkTargets: ["/", "/palvelut", "/yhteys"]
+        },
         sections: [
           {
             type: "about",
@@ -322,6 +402,23 @@ export const mockProjects: Project[] = [
         navigationLabel: "Palvelut",
         navVisible: true,
         footerVisible: true,
+        pageSEO: {
+          pageId: "services",
+          pageType: "services",
+          pagePurpose: "Jäsennä tarjooma selkeiksi palvelukokonaisuuksiksi",
+          searchIntent: "service discovery",
+          primaryTopic: "Rakennus Laine palvelut",
+          secondaryTopics: ["kylpyhuoneremontit", "keittiöremontit", "pienrakentaminen"],
+          slug: "/palvelut",
+          title: "Rakennus- ja remonttipalvelut",
+          metaDescription:
+            "Tutustu Rakennus Laineen palveluihin: kylpyhuoneremontit, keittiöremontit ja pienrakentaminen selkeästi esitettynä.",
+          h1: "Rakennus- ja remonttipalvelut",
+          canonicalPath: "/palvelut",
+          indexable: true,
+          schemaType: "CollectionPage",
+          internalLinkTargets: ["/", "/yritys", "/yhteys"]
+        },
         sections: [
           {
             type: "services",
@@ -368,6 +465,23 @@ export const mockProjects: Project[] = [
         navigationLabel: "Yhteys",
         navVisible: true,
         footerVisible: true,
+        pageSEO: {
+          pageId: "contact",
+          pageType: "contact",
+          pagePurpose: "Ohjaa kävijä yhteydenottoon tai tarjouspyyntöön",
+          searchIntent: "contact conversion",
+          primaryTopic: "Yhteydenotto Rakennus Laine",
+          secondaryTopics: ["tarjouspyyntö", "yhteystiedot"],
+          slug: "/yhteys",
+          title: "Ota yhteyttä",
+          metaDescription:
+            "Ota yhteyttä Rakennus Laineeseen ja pyydä tarjous remontti- tai rakennusprojektistasi helposti.",
+          h1: "Ota yhteyttä",
+          canonicalPath: "/yhteys",
+          indexable: true,
+          schemaType: "ContactPage",
+          internalLinkTargets: ["/", "/palvelut", "/yritys"]
+        },
         sections: [
           {
             type: "about",

@@ -1,4 +1,11 @@
-import type { Project, ProjectPage, SitemapItem, StyleDirection } from "./projects";
+import type {
+  PageSEO,
+  Project,
+  ProjectPage,
+  SiteSEO,
+  SitemapItem,
+  StyleDirection
+} from "./projects";
 import type { StylePresetId } from "./style-presets";
 import { STYLE_PRESETS } from "./style-presets";
 import { resolveIndustryProfile } from "./industry-profiles";
@@ -87,8 +94,67 @@ function buildBusinessSummary(
   return parts.join(" ");
 }
 
+function buildSiteSEO(input: {
+  companyName: string;
+  domain: string;
+  metaDescription: string;
+  industryDescription: string;
+}): SiteSEO {
+  return {
+    siteName: input.companyName,
+    titleSuffix: ` | ${input.companyName}`,
+    titlePattern: `%PAGE_TITLE% | ${input.companyName}`,
+    defaultMetaDescription:
+      input.metaDescription ||
+      `${input.companyName} tarjoaa palveluitaan selkeästi, uskottavasti ja yhteydenottoon ohjaavasti.`,
+    canonicalDomain: `https://${input.domain}`,
+    robotsDefault: "index,follow",
+    sitemapEnabled: true,
+    schemaProfileType: "LocalBusiness",
+    schemaProfileName: input.companyName,
+    schemaProfileDescription: input.industryDescription
+  };
+}
+
+function buildPageSEO(input: {
+  pageId: string;
+  pageType: "home" | "about" | "services" | "contact";
+  pagePurpose: string;
+  slug: string;
+  title: string;
+  metaDescription: string;
+  h1: string;
+  primaryTopic: string;
+  secondaryTopics: string[];
+  searchIntent: string;
+  schemaType: string;
+  internalLinkTargets: string[];
+}): PageSEO {
+  return {
+    pageId: input.pageId,
+    pageType: input.pageType,
+    pagePurpose: input.pagePurpose,
+    searchIntent: input.searchIntent,
+    primaryTopic: input.primaryTopic,
+    secondaryTopics: input.secondaryTopics,
+    slug: input.slug,
+    title: input.title,
+    metaDescription: input.metaDescription,
+    h1: input.h1,
+    canonicalPath: input.slug,
+    indexable: true,
+    schemaType: input.schemaType,
+    internalLinkTargets: input.internalLinkTargets
+  };
+}
+
 function buildPages(input: {
   companyName: string;
+  siteProfile: {
+    industry: string;
+    audience: string;
+  };
+  siteSEO: SiteSEO;
   servicesSection: ProjectPage["sections"][number];
   aboutSection: ProjectPage["sections"][number];
   testimonialsSection: ProjectPage["sections"][number];
@@ -138,13 +204,82 @@ function buildPages(input: {
     }
   ];
 
+  const homeSEO = buildPageSEO({
+    pageId: "home",
+    pageType: "home",
+    pagePurpose: sitemap[0].purpose,
+    slug: "/",
+    title: `${input.siteProfile.industry} ${input.siteProfile.audience}`,
+    metaDescription:
+      input.siteSEO.defaultMetaDescription ||
+      `${input.companyName} tarjoaa palveluitaan selkeästi ja yhteydenottoon ohjaavasti.`,
+    h1:
+      input.homeSections.find((section) => section.type === "hero")?.headline ||
+      `${input.companyName} palvelut`,
+    primaryTopic: input.siteProfile.industry,
+    secondaryTopics: [input.siteProfile.audience],
+    searchIntent: "homepage conversion",
+    schemaType: "WebPage",
+    internalLinkTargets: ["/palvelut", "/yritys", "/yhteys"]
+  });
+
+  const aboutSEO = buildPageSEO({
+    pageId: "about",
+    pageType: "about",
+    pagePurpose: sitemap[1].purpose,
+    slug: "/yritys",
+    title: `${input.companyName} yrityksenä`,
+    metaDescription:
+      `Tutustu ${input.companyName} yritykseen, toimintatapaan ja siihen, miksi se on uskottava valinta.`,
+    h1: `${input.companyName} yrityksenä`,
+    primaryTopic: `${input.companyName} yrityksenä`,
+    secondaryTopics: ["kokemus", "luotettavuus", "toimintatapa"],
+    searchIntent: "company credibility",
+    schemaType: "AboutPage",
+    internalLinkTargets: ["/", "/palvelut", "/yhteys"]
+  });
+
+  const servicesSEO = buildPageSEO({
+    pageId: "services",
+    pageType: "services",
+    pagePurpose: sitemap[2].purpose,
+    slug: "/palvelut",
+    title: `${input.siteProfile.industry} palvelut`,
+    metaDescription:
+      `${input.companyName} palvelut selkeästi jäsenneltynä. Tutustu tarjoomaan ja löydä oikea seuraava askel.`,
+    h1: `${input.siteProfile.industry} palvelut`,
+    primaryTopic: `${input.siteProfile.industry} palvelut`,
+    secondaryTopics: ["tarjooma", "palvelukokonaisuudet"],
+    searchIntent: "service discovery",
+    schemaType: "CollectionPage",
+    internalLinkTargets: ["/", "/yritys", "/yhteys"]
+  });
+
+  const contactSEO = buildPageSEO({
+    pageId: "contact",
+    pageType: "contact",
+    pagePurpose: sitemap[3].purpose,
+    slug: "/yhteys",
+    title: `Ota yhteyttä | ${input.companyName}`,
+    metaDescription:
+      `Ota yhteyttä ${input.companyName} ja pyydä tarjous tai aloita keskustelu projektistasi helposti.`,
+    h1: "Ota yhteyttä",
+    primaryTopic: `Yhteydenotto ${input.companyName}`,
+    secondaryTopics: ["tarjouspyyntö", "yhteystiedot"],
+    searchIntent: "contact conversion",
+    schemaType: "ContactPage",
+    internalLinkTargets: ["/", "/palvelut", "/yritys"]
+  });
+
   const pages: ProjectPage[] = [
     {
       ...sitemap[0],
+      pageSEO: homeSEO,
       sections: input.homeSections
     },
     {
       ...sitemap[1],
+      pageSEO: aboutSEO,
       sections: [
         {
           type: "about",
@@ -165,6 +300,7 @@ function buildPages(input: {
     },
     {
       ...sitemap[2],
+      pageSEO: servicesSEO,
       sections: [
         input.servicesSection,
         {
@@ -185,6 +321,7 @@ function buildPages(input: {
     },
     {
       ...sitemap[3],
+      pageSEO: contactSEO,
       sections: [
         {
           type: "about",
@@ -290,8 +427,20 @@ export function buildProjectFromSourceSnapshot(
     cta: ctaSection
   });
 
+  const siteSEO = buildSiteSEO({
+    companyName,
+    domain: snapshot.domain,
+    metaDescription: snapshot.metaDescription,
+    industryDescription: `${industryProfile.label} yritys, jonka sivurakenne ja hakukonenäkyvyyden perusta on mallinnettu rakenteisesti.`
+  });
+
   const { sitemap, pages } = buildPages({
     companyName,
+    siteProfile: {
+      industry: industryProfile.label,
+      audience: industryProfile.audience
+    },
+    siteSEO,
     servicesSection,
     aboutSection,
     testimonialsSection,
@@ -315,6 +464,7 @@ export function buildProjectFromSourceSnapshot(
     auditIssues: sourceAnalysis.auditIssues,
     suggestedSections: sourceAnalysis.suggestedSections,
     styleDirection,
+    siteSEO,
     sitemap,
     pages
   };
