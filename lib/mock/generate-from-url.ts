@@ -6,6 +6,7 @@ import { buildSectionPlan } from "./section-plans";
 import { getIndustryAudit } from "./industry-audit";
 import type { SourceSnapshot } from "../source/source-snapshot";
 import { fetchSourceSnapshot } from "../source/fetch-source-snapshot";
+import { normalizeSourceSnapshot } from "../source/normalize-source-snapshot";
 
 function domainToCompanyName(domain: string): string {
   const withoutTld = domain.replace(/\.[^.]+$/, "");
@@ -34,27 +35,12 @@ function resolveStylePreset(input?: string): StylePresetId {
   }
 }
 
-function resolveCompanyName(snapshot: SourceSnapshot): string {
-  const fromH1 = snapshot.h1.trim();
-
-  if (fromH1 && fromH1.length <= 60) {
-    return fromH1;
-  }
-
-  const titleCandidate = snapshot.pageTitle
-    .split(/\s[|–—-]\s/)
-    .map((part) => part.trim())
-    .find((part) => part.length >= 2 && part.length <= 60);
-
-  if (titleCandidate) {
-    return titleCandidate;
-  }
-
-  return domainToCompanyName(snapshot.domain);
+function resolveCompanyName(snapshot: ReturnType<typeof normalizeSourceSnapshot>): string {
+  return snapshot.companyNameCandidate || domainToCompanyName(snapshot.domain);
 }
 
 function buildBusinessSummary(
-  snapshot: SourceSnapshot,
+  snapshot: ReturnType<typeof normalizeSourceSnapshot>,
   companyName: string
 ): string {
   const parts: string[] = [];
@@ -82,29 +68,14 @@ function buildBusinessSummary(
   return parts.join(" ");
 }
 
-function buildSourceCorpus(snapshot: SourceSnapshot): string {
-  return [
-    snapshot.domain,
-    snapshot.pageTitle,
-    snapshot.metaDescription,
-    snapshot.h1,
-    ...snapshot.h2s,
-    ...snapshot.navItems,
-    ...snapshot.ctaTexts,
-    snapshot.bodyText.slice(0, 500)
-  ]
-    .join(" ")
-    .toLowerCase();
-}
-
 export function buildProjectFromSourceSnapshot(
-  snapshot: SourceSnapshot,
+  rawSnapshot: SourceSnapshot,
   options?: { stylePreset?: string }
 ): Project {
+  const snapshot = normalizeSourceSnapshot(rawSnapshot);
   const companyName = resolveCompanyName(snapshot);
   const stylePreset = resolveStylePreset(options?.stylePreset);
-  const sourceCorpus = buildSourceCorpus(snapshot);
-  const industryProfile = resolveIndustryProfile(sourceCorpus);
+  const industryProfile = resolveIndustryProfile(snapshot.industrySignalText);
   const industryAudit = getIndustryAudit(
     industryProfile.label.toLowerCase(),
     companyName
