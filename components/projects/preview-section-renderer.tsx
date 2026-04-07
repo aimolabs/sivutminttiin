@@ -3,11 +3,8 @@ import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type Props = {
   project: Project;
+  pageId: string;
 };
-
-function getHomePage(project: Project) {
-  return project.pages.find((page) => page.pageType === "home") ?? project.pages[0] ?? null;
-}
 
 function resolveCtaLabels(project: Project, section: ProjectSection): string[] {
   return section.ctaIds
@@ -21,10 +18,13 @@ function resolveTrustItems(project: Project, section: ProjectSection) {
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 }
 
-export function PreviewSectionRenderer({ project }: Props) {
-  const homePage = getHomePage(project);
+export function PreviewSectionRenderer({ project, pageId }: Props) {
+  const page =
+    project.pages.find((candidate) => candidate.pageId === pageId) ??
+    project.pages[0] ??
+    null;
 
-  if (!homePage) {
+  if (!page) {
     return null;
   }
 
@@ -61,7 +61,7 @@ export function PreviewSectionRenderer({ project }: Props) {
 
   return (
     <div className={pageClasses}>
-      {homePage.sections.map((section) => {
+      {page.sections.map((section) => {
         const ctaLabels = resolveCtaLabels(project, section);
         const trustItems = resolveTrustItems(project, section);
 
