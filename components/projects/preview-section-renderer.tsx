@@ -1,9 +1,25 @@
-import { Project, getHomePage } from "@/lib/mock/projects";
+import { Project, ProjectSection } from "@/lib/mock/projects";
 import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type Props = {
   project: Project;
 };
+
+function getHomePage(project: Project) {
+  return project.pages.find((page) => page.pageType === "home") ?? project.pages[0] ?? null;
+}
+
+function resolveCtaLabels(project: Project, section: ProjectSection): string[] {
+  return section.ctaIds
+    .map((ctaId) => project.ctas.find((cta) => cta.id === ctaId)?.label)
+    .filter((label): label is string => Boolean(label));
+}
+
+function resolveTrustItems(project: Project, section: ProjectSection) {
+  return section.trustItemIds
+    .map((trustId) => project.trustItems.find((item) => item.id === trustId))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+}
 
 export function PreviewSectionRenderer({ project }: Props) {
   const homePage = getHomePage(project);
@@ -12,139 +28,142 @@ export function PreviewSectionRenderer({ project }: Props) {
     return null;
   }
 
-  const stylePresetId = project.styleDirection.stylePresetId as StylePresetId;
+  const stylePresetId = project.input.stylePreset as StylePresetId;
   const preset = STYLE_PRESETS[stylePresetId];
 
   const isDark = preset.visual.theme === "dark";
 
   const pageClasses = isDark
-    ? "space-y-16 rounded-[2rem] bg-neutral-950 text-white p-8 md:p-12"
-    : "space-y-16 rounded-[2rem] bg-white text-neutral-950 p-8 md:p-12";
+    ? "space-y-16 rounded-[2rem] bg-neutral-950 p-8 text-white md:p-12"
+    : "space-y-16 rounded-[2rem] bg-white p-8 text-neutral-950 md:p-12";
 
   const mutedTextClasses = isDark ? "text-neutral-400" : "text-neutral-600";
   const subtleTextClasses = isDark ? "text-neutral-500" : "text-neutral-500";
 
   const cardClasses = isDark
-    ? "rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2"
-    : "rounded-2xl border border-neutral-200 bg-neutral-50 p-4 space-y-2";
+    ? "space-y-2 rounded-2xl border border-white/10 bg-white/5 p-4"
+    : "space-y-2 rounded-2xl border border-neutral-200 bg-neutral-50 p-4";
 
   const secondaryButtonClasses = isDark
-    ? "px-5 py-3 rounded-full text-sm border border-white/15 bg-white/5 text-white"
-    : "px-5 py-3 rounded-full text-sm border border-neutral-300 text-neutral-900";
+    ? "rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white"
+    : "rounded-full border border-neutral-300 px-5 py-3 text-sm text-neutral-900";
 
   const primaryButtonClasses =
     preset.copy.ctaStyle === "aggressive"
-      ? "px-5 py-3 rounded-full text-sm bg-blue-600 text-white"
+      ? "rounded-full bg-blue-600 px-5 py-3 text-sm text-white"
       : isDark
-        ? "px-5 py-3 rounded-full text-sm bg-white text-black"
-        : "px-5 py-3 rounded-full text-sm bg-black text-white";
+        ? "rounded-full bg-white px-5 py-3 text-sm text-black"
+        : "rounded-full bg-black px-5 py-3 text-sm text-white";
 
   const ctaSectionClasses = isDark
-    ? "rounded-[2rem] border border-white/10 bg-white/5 p-8 space-y-4"
-    : "rounded-[2rem] bg-neutral-100 p-8 space-y-4";
+    ? "space-y-4 rounded-[2rem] border border-white/10 bg-white/5 p-8"
+    : "space-y-4 rounded-[2rem] bg-neutral-100 p-8";
 
   return (
     <div className={pageClasses}>
-      {homePage.sections.map((section, index) => {
+      {homePage.sections.map((section) => {
+        const ctaLabels = resolveCtaLabels(project, section);
+        const trustItems = resolveTrustItems(project, section);
+
         switch (section.type) {
           case "hero":
             return (
-              <section key={index} className="space-y-6">
-                <div className="space-y-3">
-                  <p className={`text-sm ${mutedTextClasses}`}>
-                    {project.siteProfile.industry}
-                  </p>
+              <section key={section.id} className="space-y-6">
+                <div className="space-y-4">
+                  {section.eyebrow ? (
+                    <p className={`text-sm ${mutedTextClasses}`}>{section.eyebrow}</p>
+                  ) : null}
 
                   <h1 className="max-w-4xl text-4xl font-semibold leading-tight md:text-6xl">
-                    {section.headline.replace(
-                      "Uudellamaalla",
-                      project.siteProfile.audience
-                    )}
+                    {section.heading}
                   </h1>
 
-                  <p className={`max-w-2xl text-lg ${mutedTextClasses}`}>
-                    {section.subheadline}
-                  </p>
+                  {section.body ? (
+                    <p className={`max-w-2xl text-lg ${mutedTextClasses}`}>
+                      {section.body}
+                    </p>
+                  ) : null}
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <button className={primaryButtonClasses}>
-                    {section.primaryCta}
-                  </button>
-                  <button className={secondaryButtonClasses}>
-                    {section.secondaryCta}
-                  </button>
-                </div>
+                {ctaLabels.length > 0 ? (
+                  <div className="flex flex-wrap gap-3">
+                    {ctaLabels[0] ? (
+                      <button className={primaryButtonClasses}>{ctaLabels[0]}</button>
+                    ) : null}
+                    {ctaLabels[1] ? (
+                      <button className={secondaryButtonClasses}>{ctaLabels[1]}</button>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 <p className={`pt-2 text-xs ${subtleTextClasses}`}>
                   Konsepti suunniteltu yritykselle{" "}
-                  <span className="font-semibold">
-                    {project.siteProfile.companyName}
-                  </span>
+                  <span className="font-semibold">{project.siteProfile.companyName}</span>
                 </p>
               </section>
             );
 
           case "services":
             return (
-              <section key={index} className="space-y-6">
-                <h2 className="text-2xl font-semibold md:text-3xl">
-                  {section.title}
-                </h2>
-                <div className="grid gap-4 md:grid-cols-3">
-                  {section.items.map((item, i) => (
-                    <div key={i} className={cardClasses}>
-                      <h3 className="font-medium">{item.title}</h3>
-                      <p className={`text-sm ${mutedTextClasses}`}>
-                        {item.description}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <section key={section.id} className="space-y-6">
+                <h2 className="text-2xl font-semibold md:text-3xl">{section.heading}</h2>
+
+                {section.items?.length ? (
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {section.items.map((item) => (
+                      <div key={item.id} className={cardClasses}>
+                        <h3 className="font-medium">{item.title}</h3>
+                        {item.body ? (
+                          <p className={`text-sm ${mutedTextClasses}`}>{item.body}</p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </section>
             );
 
           case "about":
+          case "content":
+          case "faq":
             return (
-              <section key={index} className="max-w-3xl space-y-4">
-                <h2 className="text-2xl font-semibold md:text-3xl">
-                  {section.title}
-                </h2>
-                <p className={mutedTextClasses}>{section.body}</p>
+              <section key={section.id} className="max-w-3xl space-y-4">
+                <h2 className="text-2xl font-semibold md:text-3xl">{section.heading}</h2>
+                {section.body ? <p className={mutedTextClasses}>{section.body}</p> : null}
               </section>
             );
 
           case "testimonials":
             return (
-              <section key={index} className="space-y-6">
-                <h2 className="text-2xl font-semibold md:text-3xl">
-                  {section.title}
-                </h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {section.items.map((item, i) => (
-                    <div key={i} className={cardClasses}>
-                      <p className="text-sm leading-6">“{item.quote}”</p>
-                      <p className={`text-xs ${subtleTextClasses}`}>
-                        {item.name}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+              <section key={section.id} className="space-y-6">
+                <h2 className="text-2xl font-semibold md:text-3xl">{section.heading}</h2>
+
+                {trustItems.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {trustItems.map((item) => (
+                      <div key={item.id} className={cardClasses}>
+                        {item.body ? <p className="text-sm leading-6">"{item.body}"</p> : null}
+                        {item.title ? (
+                          <p className={`text-xs ${subtleTextClasses}`}>{item.title}</p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </section>
             );
 
           case "cta":
             return (
-              <section key={index} className={ctaSectionClasses}>
-                <h2 className="text-2xl font-semibold md:text-3xl">
-                  {section.title}
-                </h2>
-                <p className={mutedTextClasses}>{section.body}</p>
-                <div>
-                  <button className={primaryButtonClasses}>
-                    {section.button}
-                  </button>
-                </div>
+              <section key={section.id} className={ctaSectionClasses}>
+                <h2 className="text-2xl font-semibold md:text-3xl">{section.heading}</h2>
+                {section.body ? <p className={mutedTextClasses}>{section.body}</p> : null}
+
+                {ctaLabels[0] ? (
+                  <div>
+                    <button className={primaryButtonClasses}>{ctaLabels[0]}</button>
+                  </div>
+                ) : null}
               </section>
             );
 
