@@ -29,7 +29,8 @@ import {
   resolveCompanyArchetypeId,
   type SectionBlueprint
 } from "./company-archetypes";
-import { buildCompanyBrief } from "../briefs/build-company-brief";
+import { getCompanyBriefProvider } from "../briefs/providers";
+import type { CompanyBrief } from "../briefs/company-brief";
 
 function domainToCompanyName(domain: string): string {
   const withoutTld = domain.replace(/\.[^.]+$/, "");
@@ -74,10 +75,6 @@ function buildStyleDirection(stylePresetId: StylePresetId): StyleDirection {
     layoutDirection: preset.layout.emphasis,
     interactionMood: preset.copy.tone
   };
-}
-
-function resolveCompanyName(snapshot: NormalizedSourceSnapshot): string {
-  return snapshot.companyNameCandidate || domainToCompanyName(snapshot.domain);
 }
 
 function buildBusinessSummary(
@@ -196,7 +193,7 @@ function getPrimaryCtaActionType(
 }
 
 function buildCTAs(input: {
-  brief: ReturnType<typeof buildCompanyBrief>;
+  brief: CompanyBrief;
   sitemap: SitemapItem[];
   signals: CompanySignals;
 }): CTA[] {
@@ -231,9 +228,7 @@ function buildCTAs(input: {
   ];
 }
 
-function buildTrustItems(
-  brief: ReturnType<typeof buildCompanyBrief>
-): TrustItem[] {
+function buildTrustItems(brief: CompanyBrief): TrustItem[] {
   return brief.proofPoints.map((point, index) => ({
     id: `trust-${index + 1}`,
     type:
@@ -250,7 +245,7 @@ function buildTrustItems(
   }));
 }
 
-function buildServiceItems(brief: ReturnType<typeof buildCompanyBrief>) {
+function buildServiceItems(brief: CompanyBrief) {
   return [brief.coreOffer, ...brief.secondaryOffers].map((offer, index) => ({
     id: `service-item-${index + 1}`,
     title: offer.title,
@@ -260,7 +255,7 @@ function buildServiceItems(brief: ReturnType<typeof buildCompanyBrief>) {
 
 function buildPageSections(input: {
   blueprintList: SectionBlueprint[];
-  brief: ReturnType<typeof buildCompanyBrief>;
+  brief: CompanyBrief;
   trustItems: TrustItem[];
   industryEyebrow: string;
 }): ProjectSection[] {
@@ -431,29 +426,24 @@ function buildPageSEO(input: {
   };
 }
 
-export function buildProjectFromSourceSnapshot(
+export async function buildProjectFromSourceSnapshot(
   rawSnapshot: SourceSnapshot,
   options?: { stylePreset?: string }
-): Project {
+): Promise<Project> {
   const snapshot = normalizeSourceSnapshot(rawSnapshot);
   const signals = inferCompanySignals(snapshot);
   const archetypeId = resolveCompanyArchetypeId(signals);
   signals.companyArchetypeId = archetypeId;
 
-  const companyName = resolveCompanyName(snapshot);
+  const companyName = snapshot.companyNameCandidate || domainToCompanyName(snapshot.domain);
   const stylePreset = resolveStylePreset(options?.stylePreset);
   const styleDirection = buildStyleDirection(stylePreset);
   const industryProfile = resolveIndustryProfile(snapshot.industrySignalText);
   const archetype = getCompanyArchetype(archetypeId);
   const sourceAnalysis = analyzeSourceSnapshot(snapshot, companyName);
+  const briefProvider = getCompanyBriefProvider();
 
-  const companyBrief = buildCompanyBrief({
-    companyName,
-    snapshot,
-    signals,
-    industryProfile,
-    archetype
-  });
+  const companyBrief = await briefProvider.buildBrief({ snapshot });
 
   const sitemap: SitemapItem[] = companyBrief.recommendedPageSet.map((page) => ({
     pageId: page.id,
