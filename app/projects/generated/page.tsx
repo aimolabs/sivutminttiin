@@ -35,7 +35,7 @@ export default async function GeneratedProjectPage({
   const rawSnapshot = await fetchSourceSnapshot(url);
   const normalizedSnapshot = normalizeSourceSnapshot(rawSnapshot);
   const project = buildProjectFromSourceSnapshot(rawSnapshot, { stylePreset });
-  const activeStylePreset = STYLE_PRESETS[project.styleDirection.stylePresetId];
+  const activeStylePreset = STYLE_PRESETS[project.styleDirection.stylePresetId as StylePresetId];
 
   return (
     <main className="min-h-screen">
