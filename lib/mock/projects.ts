@@ -64,19 +64,133 @@ export type RedesignSection =
       button: string;
     };
 
-export type PageType = "home" | "about" | "services" | "contact";
+export type PageType =
+  | "home"
+  | "about"
+  | "services"
+  | "contact"
+  | "landing"
+  | "other";
+
+export type CTAActionType =
+  | "contact"
+  | "quote"
+  | "booking"
+  | "demo"
+  | "navigation";
+
+export type CTAGoal =
+  | "primary-conversion"
+  | "secondary-action"
+  | "micro-conversion";
+
+export type CTAPlacement = "hero" | "section" | "final";
+
+export type CTA = {
+  id: string;
+  label: string;
+  actionType: CTAActionType;
+  target: string;
+  goal: CTAGoal;
+  placement: CTAPlacement;
+};
+
+export type TrustItemType =
+  | "testimonial"
+  | "rating"
+  | "case"
+  | "badge"
+  | "stat";
+
+export type TrustItem = {
+  id: string;
+  type: TrustItemType;
+  title?: string;
+  body?: string;
+  proofStrength: "low" | "medium" | "high";
+};
+
+export type AssetSlotType = "image" | "video" | "icon";
+
+export type AssetSlotPurpose =
+  | "hero-visual"
+  | "service-visual"
+  | "trust"
+  | "general"
+  | "og-default"
+  | "og-page";
+
+export type AssetSlot = {
+  id: string;
+  type: AssetSlotType;
+  purpose: AssetSlotPurpose;
+  altText?: string;
+};
+
+export type SectionSEOHints = {
+  sectionId: string;
+  sectionRole: ProjectSectionRole;
+  targetSubtopic?: string;
+  anchorId?: string;
+  faqEligible?: boolean;
+};
+
+export type ProjectSectionRole =
+  | "value-proposition"
+  | "service-overview"
+  | "trust-building"
+  | "conversion"
+  | "supporting"
+  | "faq";
+
+export type ProjectSectionType =
+  | "hero"
+  | "services"
+  | "about"
+  | "testimonials"
+  | "cta"
+  | "content"
+  | "faq";
+
+export type ProjectSectionItem = {
+  id: string;
+  title: string;
+  body?: string;
+};
+
+export type ProjectSection = {
+  id: string;
+  type: ProjectSectionType;
+  sectionRole: ProjectSectionRole;
+  heading: string;
+  body?: string;
+  eyebrow?: string;
+  items?: ProjectSectionItem[];
+  ctaIds: string[];
+  trustItemIds: string[];
+  assetSlotIds: string[];
+  seoHints?: SectionSEOHints;
+};
 
 export type SiteSEO = {
   siteName: string;
   titleSuffix: string;
   titlePattern: string;
+  defaultTitle: string;
   defaultMetaDescription: string;
   canonicalDomain: string;
+  canonicalBase: string;
   robotsDefault: string;
   sitemapEnabled: boolean;
-  schemaProfileType: string;
+  defaultOgImageAssetSlot?: string;
+  schemaProfileType: "LocalBusiness" | "Organization";
   schemaProfileName: string;
   schemaProfileDescription: string;
+  schemaProfilePhone?: string;
+  schemaProfileEmail?: string;
+  schemaProfileAddress?: string;
+  schemaProfileAreaServed?: string;
+  schemaProfileSameAsLinks?: string[];
 };
 
 export type PageSEO = {
@@ -92,8 +206,15 @@ export type PageSEO = {
   h1: string;
   canonicalPath: string;
   indexable: boolean;
+  robots: "index,follow" | "noindex,nofollow";
+  robotsOverride?: string;
   schemaType: string;
+  targetLocations: string[];
+  targetServices: string[];
   internalLinkTargets: string[];
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImageAssetSlot?: string;
 };
 
 export type SitemapItem = {
@@ -105,15 +226,23 @@ export type SitemapItem = {
   navigationLabel: string;
   navVisible: boolean;
   footerVisible: boolean;
+  isPrimary?: boolean;
 };
 
 export type ProjectPage = SitemapItem & {
   pageSEO: PageSEO;
-  sections: RedesignSection[];
+  sections: ProjectSection[];
+};
+
+export type ProjectInput = {
+  sourceUrl: string;
+  industryId: string;
+  stylePreset: StylePresetId;
 };
 
 export type Project = {
   id: string;
+  input: ProjectInput;
   siteProfile: SiteProfile;
   sourceUrl: string;
   status: "draft" | "ready";
@@ -122,14 +251,26 @@ export type Project = {
   auditIssues: AuditIssue[];
   suggestedSections: SuggestedSection[];
   styleDirection: StyleDirection;
+  ctas: CTA[];
+  trustItems: TrustItem[];
+  assetSlots: AssetSlot[];
   siteSEO: SiteSEO;
   sitemap: SitemapItem[];
   pages: ProjectPage[];
+  redesign: {
+    stylePreset: StylePresetId;
+    sections: RedesignSection[];
+  };
 };
 
 export const mockProjects: Project[] = [
   {
     id: "demo",
+    input: {
+      sourceUrl: "https://rakennuslaine.fi",
+      industryId: "construction",
+      stylePreset: "premium-dark"
+    },
     siteProfile: {
       domain: "rakennuslaine.fi",
       companyName: "Rakennus Laine",
@@ -162,7 +303,8 @@ export const mockProjects: Project[] = [
     suggestedSections: [
       {
         name: "Hero + selkeä CTA",
-        reason: "Yrityksen palvelu ja toiminta-alue pitää ymmärtää viidessä sekunnissa."
+        reason:
+          "Yrityksen palvelu ja toiminta-alue pitää ymmärtää viidessä sekunnissa."
       },
       {
         name: "Palvelut kortteina",
@@ -170,7 +312,8 @@ export const mockProjects: Project[] = [
       },
       {
         name: "Miksi valita meidät",
-        reason: "Luottamus syntyy selkeydestä, kokemuksesta ja toimintatavasta."
+        reason:
+          "Luottamus syntyy selkeydestä, kokemuksesta ja toimintatavasta."
       },
       {
         name: "Asiakaspalaute",
@@ -189,19 +332,82 @@ export const mockProjects: Project[] = [
       layoutDirection: "brand-forward",
       interactionMood: "confident"
     },
+    ctas: [
+      {
+        id: "cta-home-primary",
+        label: "Pyydä tarjous",
+        actionType: "quote",
+        target: "/yhteys",
+        goal: "primary-conversion",
+        placement: "hero"
+      },
+      {
+        id: "cta-home-secondary",
+        label: "Katso palvelut",
+        actionType: "navigation",
+        target: "/palvelut",
+        goal: "secondary-action",
+        placement: "hero"
+      },
+      {
+        id: "cta-final-contact",
+        label: "Ota yhteyttä",
+        actionType: "contact",
+        target: "/yhteys",
+        goal: "primary-conversion",
+        placement: "final"
+      }
+    ],
+    trustItems: [
+      {
+        id: "trust-testimonial-1",
+        type: "testimonial",
+        title: "Asiakas 1",
+        body:
+          "Työ valmistui sovitusti ja viestintä toimi koko projektin ajan erinomaisesti.",
+        proofStrength: "high"
+      },
+      {
+        id: "trust-testimonial-2",
+        type: "testimonial",
+        title: "Asiakas 2",
+        body:
+          "Siisti työnjälki ja erittäin helppo asioida. Tämä olisi juuri oikea tunnelma myös verkkosivulle.",
+        proofStrength: "high"
+      }
+    ],
+    assetSlots: [
+      {
+        id: "asset-og-default",
+        type: "image",
+        purpose: "og-default",
+        altText: "Rakennus Laine Open Graph -kuva"
+      },
+      {
+        id: "asset-og-home",
+        type: "image",
+        purpose: "og-page",
+        altText: "Rakennus Laine etusivun Open Graph -kuva"
+      }
+    ],
     siteSEO: {
       siteName: "Rakennus Laine",
       titleSuffix: " | Rakennus Laine",
       titlePattern: "%PAGE_TITLE% | Rakennus Laine",
+      defaultTitle: "Rakennus Laine",
       defaultMetaDescription:
         "Rakennus Laine tarjoaa remontti- ja rakennuspalveluita selkeästi, luotettavasti ja yhteydenottoon ohjaavasti.",
       canonicalDomain: "https://rakennuslaine.fi",
+      canonicalBase: "https://rakennuslaine.fi",
       robotsDefault: "index,follow",
       sitemapEnabled: true,
+      defaultOgImageAssetSlot: "asset-og-default",
       schemaProfileType: "LocalBusiness",
       schemaProfileName: "Rakennus Laine",
       schemaProfileDescription:
-        "Paikallinen rakennus- ja remonttipalvelu kotitalouksille ja kiinteistöjen omistajille."
+        "Paikallinen rakennus- ja remonttipalvelu kotitalouksille ja kiinteistöjen omistajille.",
+      schemaProfileAreaServed: "Uusimaa",
+      schemaProfileSameAsLinks: []
     },
     sitemap: [
       {
@@ -212,7 +418,8 @@ export const mockProjects: Project[] = [
         purpose: "Esittele pääarvolupaus, palvelut ja ensisijainen CTA",
         navigationLabel: "Etusivu",
         navVisible: true,
-        footerVisible: true
+        footerVisible: true,
+        isPrimary: true
       },
       {
         pageId: "about",
@@ -255,13 +462,19 @@ export const mockProjects: Project[] = [
         navigationLabel: "Etusivu",
         navVisible: true,
         footerVisible: true,
+        isPrimary: true,
         pageSEO: {
           pageId: "home",
           pageType: "home",
-          pagePurpose: "Esittele pääarvolupaus, palvelut ja ensisijainen CTA",
+          pagePurpose:
+            "Esittele pääarvolupaus, palvelut ja ensisijainen CTA",
           searchIntent: "local service homepage",
           primaryTopic: "Rakennus- ja remonttipalvelut",
-          secondaryTopics: ["kylpyhuoneremontit", "keittiöremontit", "pienrakentaminen"],
+          secondaryTopics: [
+            "kylpyhuoneremontit",
+            "keittiöremontit",
+            "pienrakentaminen"
+          ],
           slug: "/",
           title: "Rakennus ja remontointi Uudellamaalla",
           metaDescription:
@@ -269,69 +482,107 @@ export const mockProjects: Project[] = [
           h1: "Luotettava tekijä remontteihin ja rakennustöihin Uudellamaalla.",
           canonicalPath: "/",
           indexable: true,
+          robots: "index,follow",
           schemaType: "WebPage",
-          internalLinkTargets: ["/palvelut", "/yritys", "/yhteys"]
+          targetLocations: ["Uusimaa"],
+          targetServices: [
+            "Kylpyhuoneremontit",
+            "Keittiöremontit",
+            "Pienrakentaminen"
+          ],
+          internalLinkTargets: ["/palvelut", "/yritys", "/yhteys"],
+          ogTitle: "Rakennus ja remontointi Uudellamaalla",
+          ogDescription:
+            "Tutustu Rakennus Laineen palveluihin ja pyydä tarjous helposti.",
+          ogImageAssetSlot: "asset-og-home"
         },
         sections: [
           {
+            id: "home-hero",
             type: "hero",
+            sectionRole: "value-proposition",
             eyebrow: "Rakennus ja remontointi",
-            headline:
+            heading:
               "Luotettava tekijä remontteihin ja rakennustöihin Uudellamaalla.",
-            subheadline:
+            body:
               "Selkeämpi palvelu, laadukas työnjälki ja sujuva yhteydenotto. Uudistettu konsepti tekee tarjonnasta heti ymmärrettävän.",
-            primaryCta: "Pyydä tarjous",
-            secondaryCta: "Katso palvelut"
+            ctaIds: ["cta-home-primary", "cta-home-secondary"],
+            trustItemIds: [],
+            assetSlotIds: [],
+            seoHints: {
+              sectionId: "home-hero",
+              sectionRole: "value-proposition",
+              targetSubtopic: "rakennus- ja remonttipalvelut",
+              anchorId: "etusivu-hero",
+              faqEligible: false
+            }
           },
           {
+            id: "home-services",
             type: "services",
-            title: "Palvelut",
+            sectionRole: "service-overview",
+            heading: "Palvelut",
             items: [
               {
+                id: "home-service-1",
                 title: "Kylpyhuoneremontit",
-                description:
+                body:
                   "Huolellisesti suunnitellut ja viimeistellyt remontit alusta loppuun."
               },
               {
+                id: "home-service-2",
                 title: "Keittiöremontit",
-                description:
+                body:
                   "Toimivat, siistit ja arkea kestävät ratkaisut kotitalouksille."
               },
               {
+                id: "home-service-3",
                 title: "Pienrakentaminen",
-                description:
+                body:
                   "Terassit, väliseinät, pintatyöt ja muut käytännölliset toteutukset."
               }
-            ]
+            ],
+            ctaIds: [],
+            trustItemIds: [],
+            assetSlotIds: [],
+            seoHints: {
+              sectionId: "home-services",
+              sectionRole: "service-overview",
+              targetSubtopic: "remonttipalvelut",
+              anchorId: "palvelut",
+              faqEligible: false
+            }
           },
           {
+            id: "home-about",
             type: "about",
-            title: "Miksi tämä konsepti toimii paremmin",
+            sectionRole: "supporting",
+            heading: "Miksi tämä konsepti toimii paremmin",
             body:
-              "Uusi rakenne tekee yrityksen osaamisesta välittömästi uskottavampaa. Sivun pääviesti, palvelut ja yhteydenotto tukevat samaa tavoitetta: kävijän pitää ymmärtää nopeasti mitä tarjotaan ja miten pääsee eteenpäin."
+              "Uusi rakenne tekee yrityksen osaamisesta välittömästi uskottavampaa. Sivun pääviesti, palvelut ja yhteydenotto tukevat samaa tavoitetta: kävijän pitää ymmärtää nopeasti mitä tarjotaan ja miten pääsee eteenpäin.",
+            ctaIds: [],
+            trustItemIds: [],
+            assetSlotIds: []
           },
           {
+            id: "home-testimonials",
             type: "testimonials",
-            title: "Asiakkaiden luottamus näkyväksi",
-            items: [
-              {
-                quote:
-                  "Työ valmistui sovitusti ja viestintä toimi koko projektin ajan erinomaisesti.",
-                name: "Asiakas 1"
-              },
-              {
-                quote:
-                  "Siisti työnjälki ja erittäin helppo asioida. Tämä olisi juuri oikea tunnelma myös verkkosivulle.",
-                name: "Asiakas 2"
-              }
-            ]
+            sectionRole: "trust-building",
+            heading: "Asiakkaiden luottamus näkyväksi",
+            ctaIds: [],
+            trustItemIds: ["trust-testimonial-1", "trust-testimonial-2"],
+            assetSlotIds: []
           },
           {
+            id: "home-cta",
             type: "cta",
-            title: "Pyydä tarjous helposti",
+            sectionRole: "conversion",
+            heading: "Pyydä tarjous helposti",
             body:
               "Selkeä yhteydenotto-osio nostaa todennäköisyyttä, että kiinnostunut kävijä ottaa heti yhteyttä.",
-            button: "Ota yhteyttä"
+            ctaIds: ["cta-final-contact"],
+            trustItemIds: [],
+            assetSlotIds: []
           }
         ]
       },
@@ -358,38 +609,47 @@ export const mockProjects: Project[] = [
           h1: "Rakennus Laine yrityksenä",
           canonicalPath: "/yritys",
           indexable: true,
+          robots: "index,follow",
           schemaType: "AboutPage",
-          internalLinkTargets: ["/", "/palvelut", "/yhteys"]
+          targetLocations: ["Uusimaa"],
+          targetServices: [],
+          internalLinkTargets: ["/", "/palvelut", "/yhteys"],
+          ogTitle: "Rakennus Laine yrityksenä",
+          ogDescription:
+            "Tutustu yritykseen, toimintatapaan ja luotettavuuteen.",
+          ogImageAssetSlot: "asset-og-default"
         },
         sections: [
           {
+            id: "about-company",
             type: "about",
-            title: "Rakennus Laine yrityksenä",
+            sectionRole: "trust-building",
+            heading: "Rakennus Laine yrityksenä",
             body:
-              "Tämän sivun tarkoitus on tehdä yrityksen toimintatavasta, kokemuksesta ja luotettavuudesta näkyvämpi osa kokonaisuutta."
+              "Tämän sivun tarkoitus on tehdä yrityksen toimintatavasta, kokemuksesta ja luotettavuudesta näkyvämpi osa kokonaisuutta.",
+            ctaIds: [],
+            trustItemIds: [],
+            assetSlotIds: []
           },
           {
+            id: "about-testimonials",
             type: "testimonials",
-            title: "Luottamus rakennetaan näkyviin",
-            items: [
-              {
-                quote:
-                  "Yrityssivu tekee tekijästä uskottavamman jo ennen ensimmäistä yhteydenottoa.",
-                name: "Konseptihavainto 1"
-              },
-              {
-                quote:
-                  "Kun kokemus, toimintatapa ja luottamussignaalit nostetaan näkyviin, koko sivusto tuntuu vahvemmalta.",
-                name: "Konseptihavainto 2"
-              }
-            ]
+            sectionRole: "trust-building",
+            heading: "Luottamus rakennetaan näkyviin",
+            ctaIds: [],
+            trustItemIds: ["trust-testimonial-1", "trust-testimonial-2"],
+            assetSlotIds: []
           },
           {
+            id: "about-cta",
             type: "cta",
-            title: "Keskustellaan projektistasi",
+            sectionRole: "conversion",
+            heading: "Keskustellaan projektistasi",
             body:
               "Yrityssivun tehtävä ei ole vain kertoa historiasta, vaan tukea seuraavaa askelta kohti yhteydenottoa.",
-            button: "Ota yhteyttä"
+            ctaIds: ["cta-final-contact"],
+            trustItemIds: [],
+            assetSlotIds: []
           }
         ]
       },
@@ -408,7 +668,11 @@ export const mockProjects: Project[] = [
           pagePurpose: "Jäsennä tarjooma selkeiksi palvelukokonaisuuksiksi",
           searchIntent: "service discovery",
           primaryTopic: "Rakennus Laine palvelut",
-          secondaryTopics: ["kylpyhuoneremontit", "keittiöremontit", "pienrakentaminen"],
+          secondaryTopics: [
+            "kylpyhuoneremontit",
+            "keittiöremontit",
+            "pienrakentaminen"
+          ],
           slug: "/palvelut",
           title: "Rakennus- ja remonttipalvelut",
           metaDescription:
@@ -416,43 +680,71 @@ export const mockProjects: Project[] = [
           h1: "Rakennus- ja remonttipalvelut",
           canonicalPath: "/palvelut",
           indexable: true,
+          robots: "index,follow",
           schemaType: "CollectionPage",
-          internalLinkTargets: ["/", "/yritys", "/yhteys"]
+          targetLocations: ["Uusimaa"],
+          targetServices: [
+            "Kylpyhuoneremontit",
+            "Keittiöremontit",
+            "Pienrakentaminen"
+          ],
+          internalLinkTargets: ["/", "/yritys", "/yhteys"],
+          ogTitle: "Rakennus- ja remonttipalvelut",
+          ogDescription:
+            "Tutustu selkeästi jäsenneltyihin palveluihin ja pyydä tarjous.",
+          ogImageAssetSlot: "asset-og-default"
         },
         sections: [
           {
+            id: "services-overview",
             type: "services",
-            title: "Palvelut",
+            sectionRole: "service-overview",
+            heading: "Palvelut",
             items: [
               {
+                id: "services-1",
                 title: "Kylpyhuoneremontit",
-                description:
+                body:
                   "Huolellisesti suunnitellut ja viimeistellyt remontit alusta loppuun."
               },
               {
+                id: "services-2",
                 title: "Keittiöremontit",
-                description:
+                body:
                   "Toimivat, siistit ja arkea kestävät ratkaisut kotitalouksille."
               },
               {
+                id: "services-3",
                 title: "Pienrakentaminen",
-                description:
+                body:
                   "Terassit, väliseinät, pintatyöt ja muut käytännölliset toteutukset."
               }
-            ]
+            ],
+            ctaIds: [],
+            trustItemIds: [],
+            assetSlotIds: []
           },
           {
+            id: "services-supporting",
             type: "about",
-            title: "Miten palvelusivu toimii paremmin",
+            sectionRole: "supporting",
+            heading: "Miten palvelusivu toimii paremmin",
             body:
-              "Palvelusivun tarkoitus on tehdä tarjoomasta helposti ymmärrettävä, tukea päätöksentekoa ja ohjata kävijä suoraan oikeaan toimintoon."
+              "Palvelusivun tarkoitus on tehdä tarjoomasta helposti ymmärrettävä, tukea päätöksentekoa ja ohjata kävijä suoraan oikeaan toimintoon.",
+            ctaIds: [],
+            trustItemIds: [],
+            assetSlotIds: []
           },
           {
+            id: "services-cta",
             type: "cta",
-            title: "Pyydä tarjous oikeasta palvelusta",
+            sectionRole: "conversion",
+            heading: "Pyydä tarjous oikeasta palvelusta",
             body:
               "Kun palvelut on jäsennelty selkeästi, kiinnostunut kävijä etenee helpommin yhteydenottoon.",
-            button: "Pyydä tarjous"
+            ctaIds: ["cta-home-primary"],
+            trustItemIds: [],
+            assetSlotIds: []
           }
         ]
       },
@@ -468,7 +760,8 @@ export const mockProjects: Project[] = [
         pageSEO: {
           pageId: "contact",
           pageType: "contact",
-          pagePurpose: "Ohjaa kävijä yhteydenottoon tai tarjouspyyntöön",
+          pagePurpose:
+            "Ohjaa kävijä yhteydenottoon tai tarjouspyyntöön",
           searchIntent: "contact conversion",
           primaryTopic: "Yhteydenotto Rakennus Laine",
           secondaryTopics: ["tarjouspyyntö", "yhteystiedot"],
@@ -479,26 +772,107 @@ export const mockProjects: Project[] = [
           h1: "Ota yhteyttä",
           canonicalPath: "/yhteys",
           indexable: true,
+          robots: "index,follow",
           schemaType: "ContactPage",
-          internalLinkTargets: ["/", "/palvelut", "/yritys"]
+          targetLocations: ["Uusimaa"],
+          targetServices: [],
+          internalLinkTargets: ["/", "/palvelut", "/yritys"],
+          ogTitle: "Ota yhteyttä",
+          ogDescription:
+            "Pyydä tarjous tai aloita keskustelu projektistasi helposti.",
+          ogImageAssetSlot: "asset-og-default"
         },
         sections: [
           {
+            id: "contact-about",
             type: "about",
-            title: "Ota yhteyttä",
+            sectionRole: "conversion",
+            heading: "Ota yhteyttä",
             body:
-              "Yhteyssivun tehtävä on poistaa kitkaa ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo."
+              "Yhteyssivun tehtävä on poistaa kitkaa ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo.",
+            ctaIds: [],
+            trustItemIds: [],
+            assetSlotIds: []
           },
           {
+            id: "contact-cta",
             type: "cta",
-            title: "Pyydä tarjous helposti",
+            sectionRole: "conversion",
+            heading: "Pyydä tarjous helposti",
             body:
               "Selkeä yhteydenottopolku lisää todennäköisyyttä, että kiinnostunut kävijä toimii heti.",
-            button: "Ota yhteyttä"
+            ctaIds: ["cta-final-contact"],
+            trustItemIds: [],
+            assetSlotIds: []
           }
         ]
       }
-    ]
+    ],
+    redesign: {
+      stylePreset: "premium-dark",
+      sections: [
+        {
+          type: "hero",
+          eyebrow: "Rakennus ja remontointi",
+          headline:
+            "Luotettava tekijä remontteihin ja rakennustöihin Uudellamaalla.",
+          subheadline:
+            "Selkeämpi palvelu, laadukas työnjälki ja sujuva yhteydenotto. Uudistettu konsepti tekee tarjonnasta heti ymmärrettävän.",
+          primaryCta: "Pyydä tarjous",
+          secondaryCta: "Katso palvelut"
+        },
+        {
+          type: "services",
+          title: "Palvelut",
+          items: [
+            {
+              title: "Kylpyhuoneremontit",
+              description:
+                "Huolellisesti suunnitellut ja viimeistellyt remontit alusta loppuun."
+            },
+            {
+              title: "Keittiöremontit",
+              description:
+                "Toimivat, siistit ja arkea kestävät ratkaisut kotitalouksille."
+            },
+            {
+              title: "Pienrakentaminen",
+              description:
+                "Terassit, väliseinät, pintatyöt ja muut käytännölliset toteutukset."
+            }
+          ]
+        },
+        {
+          type: "about",
+          title: "Miksi tämä konsepti toimii paremmin",
+          body:
+            "Uusi rakenne tekee yrityksen osaamisesta välittömästi uskottavampaa. Sivun pääviesti, palvelut ja yhteydenotto tukevat samaa tavoitetta: kävijän pitää ymmärtää nopeasti mitä tarjotaan ja miten pääsee eteenpäin."
+        },
+        {
+          type: "testimonials",
+          title: "Asiakkaiden luottamus näkyväksi",
+          items: [
+            {
+              quote:
+                "Työ valmistui sovitusti ja viestintä toimi koko projektin ajan erinomaisesti.",
+              name: "Asiakas 1"
+            },
+            {
+              quote:
+                "Siisti työnjälki ja erittäin helppo asioida. Tämä olisi juuri oikea tunnelma myös verkkosivulle.",
+              name: "Asiakas 2"
+            }
+          ]
+        },
+        {
+          type: "cta",
+          title: "Pyydä tarjous helposti",
+          body:
+            "Selkeä yhteydenotto-osio nostaa todennäköisyyttä, että kiinnostunut kävijä ottaa heti yhteyttä.",
+          button: "Ota yhteyttä"
+        }
+      ]
+    }
   }
 ];
 
@@ -507,9 +881,5 @@ export function getProjectById(id: string) {
 }
 
 export function getHomePage(project: Project) {
-  return (
-    project.pages.find((page) => page.pageType === "home") ??
-    project.pages[0] ??
-    null
-  );
+  return project.pages.find((page) => page.pageType === "home") ?? project.pages[0] ?? null;
 }
