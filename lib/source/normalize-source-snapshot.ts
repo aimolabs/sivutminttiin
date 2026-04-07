@@ -14,6 +14,10 @@ export type NormalizedSourceSnapshot = {
   companyNameCandidate: string;
   industrySignalText: string;
   usableTextSummary: string;
+  siteName: string;
+  themeColor: string;
+  ogImageUrl: string;
+  iconUrl: string;
 };
 
 const GENERIC_HEADINGS = /^(etusivu|home|palvelut|services|yhteystiedot|contact|meistä|about|blogi|blog|faq)$/i;
@@ -26,7 +30,7 @@ function decodeHtml(value: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
+    .replace(/&gt;/g, " ")
     .replace(/&nbsp;/g, " ");
 }
 
@@ -50,6 +54,13 @@ function sanitizeText(value: string): string {
   return normalizeWhitespace(
     decodeHtml(removeDataUris(stripTags(removeComments(value))))
   );
+}
+
+function sanitizeUrl(value: string): string {
+  const cleaned = normalizeWhitespace(value);
+  if (!cleaned) return "";
+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
+  return "";
 }
 
 function looksGarbage(value: string): boolean {
@@ -165,12 +176,18 @@ function resolveCompanyNameCandidate(input: {
   domain: string;
   pageTitle: string;
   h1: string;
+  siteName: string;
 }): string {
   const titleCandidates = splitTitleCandidates(input.pageTitle);
   const titleBrand = titleCandidates.find(looksLikeCompanyName);
 
   if (titleBrand) {
     return titleBrand;
+  }
+
+  const cleanSiteName = sanitizeText(input.siteName);
+  if (looksLikeCompanyName(cleanSiteName)) {
+    return cleanSiteName;
   }
 
   const cleanH1 = sanitizeText(input.h1);
@@ -190,9 +207,11 @@ function buildIndustrySignalText(input: {
   navItems: string[];
   ctaTexts: string[];
   bodyText: string;
+  siteName: string;
 }): string {
   return [
     input.domain,
+    input.siteName,
     input.pageTitle,
     input.metaDescription,
     input.h1,
@@ -211,8 +230,10 @@ function buildUsableTextSummary(input: {
   metaDescription: string;
   h1: string;
   h2s: string[];
+  siteName: string;
 }): string {
   return [
+    input.siteName,
     input.pageTitle,
     input.metaDescription,
     input.h1,
@@ -232,11 +253,16 @@ export function normalizeSourceSnapshot(
   const navItems = filterNavItems(snapshot.navItems);
   const ctaTexts = filterCtas(snapshot.ctaTexts);
   const bodyText = normalizeBodyText(snapshot.bodyText);
+  const siteName = sanitizeText(snapshot.siteName);
+  const themeColor = sanitizeText(snapshot.themeColor);
+  const ogImageUrl = sanitizeUrl(snapshot.ogImageUrl);
+  const iconUrl = sanitizeUrl(snapshot.iconUrl);
 
   const companyNameCandidate = resolveCompanyNameCandidate({
     domain: snapshot.domain,
     pageTitle,
-    h1
+    h1,
+    siteName
   });
 
   const industrySignalText = buildIndustrySignalText({
@@ -247,14 +273,16 @@ export function normalizeSourceSnapshot(
     h2s,
     navItems,
     ctaTexts,
-    bodyText
+    bodyText,
+    siteName
   });
 
   const usableTextSummary = buildUsableTextSummary({
     pageTitle,
     metaDescription,
     h1,
-    h2s
+    h2s,
+    siteName
   });
 
   return {
@@ -270,6 +298,10 @@ export function normalizeSourceSnapshot(
     bodyText,
     companyNameCandidate,
     industrySignalText,
-    usableTextSummary
+    usableTextSummary,
+    siteName,
+    themeColor,
+    ogImageUrl,
+    iconUrl
   };
 }
