@@ -1,4 +1,5 @@
 import { StylePresetId } from "./style-presets";
+import type { CompanyBrief } from "../briefs/company-brief";
 
 export type AuditIssue = {
   title: string;
@@ -248,6 +249,7 @@ export type Project = {
   status: "draft" | "ready";
   createdAt: string;
   businessSummary: string;
+  companyBrief?: CompanyBrief;
   auditIssues: AuditIssue[];
   suggestedSections: SuggestedSection[];
   styleDirection: StyleDirection;
