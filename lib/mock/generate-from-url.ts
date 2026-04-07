@@ -3,10 +3,10 @@ import type { StylePresetId } from "./style-presets";
 import { resolveIndustryProfile } from "./industry-profiles";
 import { applyStylePresetToContent } from "./apply-style-preset";
 import { buildSectionPlan } from "./section-plans";
-import { getIndustryAudit } from "./industry-audit";
 import type { SourceSnapshot } from "../source/source-snapshot";
 import { fetchSourceSnapshot } from "../source/fetch-source-snapshot";
 import { normalizeSourceSnapshot } from "../source/normalize-source-snapshot";
+import { analyzeSourceSnapshot } from "../source/analyze-source-snapshot";
 
 function domainToCompanyName(domain: string): string {
   const withoutTld = domain.replace(/\.[^.]+$/, "");
@@ -76,10 +76,7 @@ export function buildProjectFromSourceSnapshot(
   const companyName = resolveCompanyName(snapshot);
   const stylePreset = resolveStylePreset(options?.stylePreset);
   const industryProfile = resolveIndustryProfile(snapshot.industrySignalText);
-  const industryAudit = getIndustryAudit(
-    industryProfile.label.toLowerCase(),
-    companyName
-  );
+  const sourceAnalysis = analyzeSourceSnapshot(snapshot, companyName);
 
   const baseAboutBody =
     "Konsepti tekee sivusta myynnillisesti terävämmän. Kävijä näkee nopeammin mitä tarjotaan, miksi siihen kannattaa luottaa ja mitä seuraavaksi kannattaa tehdä. Näin etusivu ei jää vain käyntikortiksi, vaan alkaa ohjata toimintaa.";
@@ -173,8 +170,8 @@ export function buildProjectFromSourceSnapshot(
     status: snapshot.fetchStatus === "live" ? "ready" : "draft",
     createdAt: new Date().toISOString().slice(0, 10),
     businessSummary: buildBusinessSummary(snapshot, companyName),
-    auditIssues: industryAudit.auditIssues,
-    suggestedSections: industryAudit.suggestedSections,
+    auditIssues: sourceAnalysis.auditIssues,
+    suggestedSections: sourceAnalysis.suggestedSections,
     redesign: {
       stylePreset,
       sections
