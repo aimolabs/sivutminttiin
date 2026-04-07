@@ -442,7 +442,7 @@ export async function buildProjectFromSourceSnapshot(
   const briefProvider = getCompanyBriefProvider();
 
   const fallbackCompanyBrief = await briefProvider.buildBrief({ snapshot });
-const companyBrief = await getCompanyBrief(url, fallbackCompanyBrief);
+const companyBrief = await getCompanyBrief(snapshot.sourceUrl, fallbackCompanyBrief);
 
   if (options?.industryId) {
     companyBrief.inferredIndustryId = options.industryId;
