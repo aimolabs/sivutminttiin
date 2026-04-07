@@ -35,7 +35,7 @@ export default async function GeneratedProjectPage({
   const rawSnapshot = await fetchSourceSnapshot(url);
   const normalizedSnapshot = normalizeSourceSnapshot(rawSnapshot);
   const project = buildProjectFromSourceSnapshot(rawSnapshot, { stylePreset });
-  const activeStylePreset = STYLE_PRESETS[project.redesign.stylePreset];
+  const activeStylePreset = STYLE_PRESETS[project.styleDirection.stylePresetId];
 
   return (
     <main className="min-h-screen">
@@ -67,7 +67,7 @@ export default async function GeneratedProjectPage({
 
             <div className="flex flex-wrap gap-3">
               <Link
-                href={`/projects/generated/preview?url=${encodeURIComponent(url)}&stylePreset=${project.redesign.stylePreset}`}
+                href={`/projects/generated/preview?url=${encodeURIComponent(url)}&stylePreset=${project.styleDirection.stylePresetId}`}
                 className="rounded-full bg-sky-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:opacity-90"
               >
                 Avaa client preview
@@ -91,7 +91,7 @@ export default async function GeneratedProjectPage({
           <div className="mt-4 flex flex-wrap gap-3">
             {PRESET_ORDER.map((presetId) => {
               const preset = STYLE_PRESETS[presetId];
-              const isActive = presetId === project.redesign.stylePreset;
+              const isActive = presetId === project.styleDirection.stylePresetId;
 
               return (
                 <Link
@@ -140,6 +140,34 @@ export default async function GeneratedProjectPage({
               suoraan likaiseen HTML-raakadataan, vaan käyttää puhdistettuja signaaleja
               konseptin muodostamiseen.
             </p>
+          </div>
+        </section>
+
+        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6">
+          <p className="text-sm uppercase tracking-[0.24em] text-sky-300/80">
+            Generated sitemap
+          </p>
+
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {project.sitemap.map((page) => (
+              <div
+                key={page.pageId}
+                className="rounded-2xl border border-white/10 bg-black/10 p-4"
+              >
+                <p className="text-xs uppercase tracking-[0.2em] text-white/45">
+                  {page.pageType}
+                </p>
+                <p className="mt-2 text-base font-semibold text-white">
+                  {page.title}
+                </p>
+                <p className="mt-2 text-sm text-white/70">
+                  {page.slug}
+                </p>
+                <p className="mt-3 text-sm leading-7 text-white/70">
+                  {page.purpose}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
 

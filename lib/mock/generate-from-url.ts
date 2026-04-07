@@ -1,5 +1,6 @@
-import type { Project } from "./projects";
+import type { Project, ProjectPage, SitemapItem, StyleDirection } from "./projects";
 import type { StylePresetId } from "./style-presets";
+import { STYLE_PRESETS } from "./style-presets";
 import { resolveIndustryProfile } from "./industry-profiles";
 import { applyStylePresetToContent } from "./apply-style-preset";
 import { buildSectionPlan } from "./section-plans";
@@ -35,6 +36,24 @@ function resolveStylePreset(input?: string): StylePresetId {
   }
 }
 
+function buildStyleDirection(stylePresetId: StylePresetId): StyleDirection {
+  const preset = STYLE_PRESETS[stylePresetId];
+
+  return {
+    stylePresetId,
+    visualTone: preset.label,
+    density:
+      preset.layout.density === "compact"
+        ? "compact"
+        : preset.layout.density === "spacious"
+          ? "spacious"
+          : "balanced",
+    contrastLevel: preset.visual.theme === "dark" ? "high" : "medium",
+    layoutDirection: preset.layout.emphasis,
+    interactionMood: preset.copy.tone
+  };
+}
+
 function resolveCompanyName(snapshot: ReturnType<typeof normalizeSourceSnapshot>): string {
   return snapshot.companyNameCandidate || domainToCompanyName(snapshot.domain);
 }
@@ -68,6 +87,119 @@ function buildBusinessSummary(
   return parts.join(" ");
 }
 
+function buildPages(input: {
+  companyName: string;
+  servicesSection: ProjectPage["sections"][number];
+  aboutSection: ProjectPage["sections"][number];
+  testimonialsSection: ProjectPage["sections"][number];
+  ctaSection: ProjectPage["sections"][number];
+  homeSections: ProjectPage["sections"];
+}): { sitemap: SitemapItem[]; pages: ProjectPage[] } {
+  const sitemap: SitemapItem[] = [
+    {
+      pageId: "home",
+      slug: "/",
+      pageType: "home",
+      title: "Etusivu",
+      purpose: "Esittele pääarvolupaus, palvelut ja ensisijainen CTA",
+      navigationLabel: "Etusivu",
+      navVisible: true,
+      footerVisible: true
+    },
+    {
+      pageId: "about",
+      slug: "/yritys",
+      pageType: "about",
+      title: "Yritys",
+      purpose: "Rakenna luottamusta ja kerro yrityksestä",
+      navigationLabel: "Yritys",
+      navVisible: true,
+      footerVisible: true
+    },
+    {
+      pageId: "services",
+      slug: "/palvelut",
+      pageType: "services",
+      title: "Palvelut",
+      purpose: "Jäsennä tarjooma selkeiksi palvelukokonaisuuksiksi",
+      navigationLabel: "Palvelut",
+      navVisible: true,
+      footerVisible: true
+    },
+    {
+      pageId: "contact",
+      slug: "/yhteys",
+      pageType: "contact",
+      title: "Yhteys",
+      purpose: "Ohjaa kävijä yhteydenottoon tai tarjouspyyntöön",
+      navigationLabel: "Yhteys",
+      navVisible: true,
+      footerVisible: true
+    }
+  ];
+
+  const pages: ProjectPage[] = [
+    {
+      ...sitemap[0],
+      sections: input.homeSections
+    },
+    {
+      ...sitemap[1],
+      sections: [
+        {
+          type: "about",
+          title: `${input.companyName} yrityksenä`,
+          body:
+            "Tämän sivun tarkoitus on tehdä yrityksen toimintatavasta, kokemuksesta ja luotettavuudesta näkyvämpi osa kokonaisuutta."
+        },
+        input.testimonialsSection,
+        {
+          type: "cta",
+          title: "Keskustellaan projektistasi",
+          body:
+            "Yrityssivun tehtävä ei ole vain kertoa historiasta, vaan tukea seuraavaa askelta kohti yhteydenottoa.",
+          button:
+            input.ctaSection.type === "cta" ? input.ctaSection.button : "Ota yhteyttä"
+        }
+      ]
+    },
+    {
+      ...sitemap[2],
+      sections: [
+        input.servicesSection,
+        {
+          type: "about",
+          title: "Miten palvelusivu toimii paremmin",
+          body:
+            "Palvelusivun tarkoitus on tehdä tarjoomasta helposti ymmärrettävä, tukea päätöksentekoa ja ohjata kävijä suoraan oikeaan toimintoon."
+        },
+        {
+          type: "cta",
+          title: "Pyydä tarjous oikeasta palvelusta",
+          body:
+            "Kun palvelut on jäsennelty selkeästi, kiinnostunut kävijä etenee helpommin yhteydenottoon.",
+          button:
+            input.ctaSection.type === "cta" ? input.ctaSection.button : "Pyydä tarjous"
+        }
+      ]
+    },
+    {
+      ...sitemap[3],
+      sections: [
+        {
+          type: "about",
+          title: "Ota yhteyttä",
+          body:
+            "Yhteyssivun tehtävä on poistaa kitkaa ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo."
+        },
+        input.ctaSection
+      ]
+    }
+  ];
+
+  return { sitemap, pages };
+}
+
 export function buildProjectFromSourceSnapshot(
   rawSnapshot: SourceSnapshot,
   options?: { stylePreset?: string }
@@ -75,6 +207,7 @@ export function buildProjectFromSourceSnapshot(
   const snapshot = normalizeSourceSnapshot(rawSnapshot);
   const companyName = resolveCompanyName(snapshot);
   const stylePreset = resolveStylePreset(options?.stylePreset);
+  const styleDirection = buildStyleDirection(stylePreset);
   const industryProfile = resolveIndustryProfile(snapshot.industrySignalText);
   const sourceAnalysis = analyzeSourceSnapshot(snapshot, companyName);
 
@@ -149,12 +282,21 @@ export function buildProjectFromSourceSnapshot(
         : presetContent.primaryCta
   };
 
-  const sections = buildSectionPlan(stylePreset, {
+  const homeSections = buildSectionPlan(stylePreset, {
     hero: heroSection,
     services: servicesSection,
     about: aboutSection,
     testimonials: testimonialsSection,
     cta: ctaSection
+  });
+
+  const { sitemap, pages } = buildPages({
+    companyName,
+    servicesSection,
+    aboutSection,
+    testimonialsSection,
+    ctaSection,
+    homeSections
   });
 
   return {
@@ -172,10 +314,9 @@ export function buildProjectFromSourceSnapshot(
     businessSummary: buildBusinessSummary(snapshot, companyName),
     auditIssues: sourceAnalysis.auditIssues,
     suggestedSections: sourceAnalysis.suggestedSections,
-    redesign: {
-      stylePreset,
-      sections
-    }
+    styleDirection,
+    sitemap,
+    pages
   };
 }
 

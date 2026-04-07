@@ -1,4 +1,4 @@
-import { Project } from "@/lib/mock/projects";
+import { Project, getHomePage } from "@/lib/mock/projects";
 import { STYLE_PRESETS, type StylePresetId } from "@/lib/mock/style-presets";
 
 type Props = {
@@ -6,7 +6,13 @@ type Props = {
 };
 
 export function PreviewSectionRenderer({ project }: Props) {
-  const stylePresetId = project.redesign.stylePreset as StylePresetId;
+  const homePage = getHomePage(project);
+
+  if (!homePage) {
+    return null;
+  }
+
+  const stylePresetId = project.styleDirection.stylePresetId as StylePresetId;
   const preset = STYLE_PRESETS[stylePresetId];
 
   const isDark = preset.visual.theme === "dark";
@@ -39,7 +45,7 @@ export function PreviewSectionRenderer({ project }: Props) {
 
   return (
     <div className={pageClasses}>
-      {project.redesign.sections.map((section, index) => {
+      {homePage.sections.map((section, index) => {
         switch (section.type) {
           case "hero":
             return (
