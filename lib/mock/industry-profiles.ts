@@ -1,3 +1,15 @@
+export type IndustryPageBlueprint = {
+  id: string;
+  pageType: "home" | "about" | "services" | "contact" | "landing" | "other";
+  slug: string;
+  navigationLabel: string;
+  title: string;
+  purpose: string;
+  navVisible: boolean;
+  footerVisible: boolean;
+  isPrimary?: boolean;
+};
+
 export type IndustryProfile = {
   id: string;
   label: string;
@@ -13,7 +25,52 @@ export type IndustryProfile = {
   }>;
   ctaTitle: string;
   ctaBody: string;
+  pageBlueprints: IndustryPageBlueprint[];
 };
+
+const DEFAULT_PAGE_BLUEPRINTS: IndustryPageBlueprint[] = [
+  {
+    id: "home",
+    pageType: "home",
+    slug: "/",
+    navigationLabel: "Etusivu",
+    title: "Etusivu",
+    purpose: "Esittele pääarvolupaus, tärkeimmät palvelut ja ensisijainen CTA",
+    navVisible: true,
+    footerVisible: true,
+    isPrimary: true
+  },
+  {
+    id: "services",
+    pageType: "services",
+    slug: "/palvelut",
+    navigationLabel: "Palvelut",
+    title: "Palvelut",
+    purpose: "Jäsennä tarjooma selkeiksi palvelukokonaisuuksiksi",
+    navVisible: true,
+    footerVisible: true
+  },
+  {
+    id: "about",
+    pageType: "about",
+    slug: "/yritys",
+    navigationLabel: "Yritys",
+    title: "Yritys",
+    purpose: "Rakenna luottamusta ja kerro yrityksestä",
+    navVisible: true,
+    footerVisible: true
+  },
+  {
+    id: "contact",
+    pageType: "contact",
+    slug: "/yhteys",
+    navigationLabel: "Yhteys",
+    title: "Yhteys",
+    purpose: "Ohjaa kävijä yhteydenottoon tai tarjouspyyntöön",
+    navVisible: true,
+    footerVisible: true
+  }
+];
 
 export const DEFAULT_INDUSTRY_PROFILE: IndustryProfile = {
   id: "local-services",
@@ -45,7 +102,8 @@ export const DEFAULT_INDUSTRY_PROFILE: IndustryProfile = {
   ],
   ctaTitle: "Tehdään yhteydenotosta helppoa",
   ctaBody:
-    "Selkeä loppuosa ja yksi ensisijainen CTA nostavat todennäköisyyttä, että kiinnostunut kävijä ottaa yhteyttä heti."
+    "Selkeä loppuosa ja yksi ensisijainen CTA nostavat todennäköisyyttä, että kiinnostunut kävijä ottaa yhteyttä heti.",
+  pageBlueprints: DEFAULT_PAGE_BLUEPRINTS
 };
 
 export const INDUSTRY_PROFILES: IndustryProfile[] = [
@@ -79,7 +137,50 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
     ],
     ctaTitle: "Pyydä tarjous matalalla kynnyksellä",
     ctaBody:
-      "Rakennusalan sivun tärkein tehtävä on poistaa epävarmuutta ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo."
+      "Rakennusalan sivun tärkein tehtävä on poistaa epävarmuutta ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo.",
+    pageBlueprints: [
+      {
+        id: "home",
+        pageType: "home",
+        slug: "/",
+        navigationLabel: "Etusivu",
+        title: "Etusivu",
+        purpose: "Esittele pääarvolupaus, tärkeimmät palvelut ja tarjouspyynnön CTA",
+        navVisible: true,
+        footerVisible: true,
+        isPrimary: true
+      },
+      {
+        id: "services",
+        pageType: "services",
+        slug: "/palvelut",
+        navigationLabel: "Palvelut",
+        title: "Palvelut",
+        purpose: "Jäsennä remontti- ja rakennuspalvelut helposti hahmotettaviksi",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "about",
+        pageType: "about",
+        slug: "/yritys",
+        navigationLabel: "Yritys",
+        title: "Yritys",
+        purpose: "Rakenna luottamusta kokemuksen, toimintatavan ja työnjäljen kautta",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "contact",
+        pageType: "contact",
+        slug: "/pyyda-tarjous",
+        navigationLabel: "Pyydä tarjous",
+        title: "Pyydä tarjous",
+        purpose: "Poista kitkaa tarjouspyynnöstä ja ohjaa kävijä yhteydenottoon",
+        navVisible: true,
+        footerVisible: true
+      }
+    ]
   },
   {
     id: "legal",
@@ -111,7 +212,50 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
     ],
     ctaTitle: "Tee yhteydenotosta turvallinen",
     ctaBody:
-      "Lakipalveluissa CTA:n pitää tuntua selkeältä, rauhalliselta ja matalariskiseltä ensimmäiseltä askeleelta."
+      "Lakipalveluissa CTA:n pitää tuntua selkeältä, rauhalliselta ja matalariskiseltä ensimmäiseltä askeleelta.",
+    pageBlueprints: [
+      {
+        id: "home",
+        pageType: "home",
+        slug: "/",
+        navigationLabel: "Etusivu",
+        title: "Etusivu",
+        purpose: "Esittele ydinosaaminen ja tee ensimmäisestä yhteydenotosta turvallinen",
+        navVisible: true,
+        footerVisible: true,
+        isPrimary: true
+      },
+      {
+        id: "services",
+        pageType: "services",
+        slug: "/osaamisalueet",
+        navigationLabel: "Osaamisalueet",
+        title: "Osaamisalueet",
+        purpose: "Jäsennä oikeudelliset palvelualueet selkeästi asiakastilanteiden kautta",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "about",
+        pageType: "about",
+        slug: "/toimisto",
+        navigationLabel: "Toimisto",
+        title: "Toimisto",
+        purpose: "Rakenna asiantuntijaluottamusta toimintatavan ja profiilin kautta",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "contact",
+        pageType: "contact",
+        slug: "/ota-yhteytta",
+        navigationLabel: "Ota yhteyttä",
+        title: "Ota yhteyttä",
+        purpose: "Ohjaa rauhalliseen ja matalariskiseen ensimmäiseen yhteydenottoon",
+        navVisible: true,
+        footerVisible: true
+      }
+    ]
   },
   {
     id: "creative",
@@ -143,7 +287,50 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
     ],
     ctaTitle: "Aloitetaan uusi projekti",
     ctaBody:
-      "Luovan studion sivun pitää houkutella oikeanlaisia toimeksiantoja ja tehdä yhteydenotosta luonnollinen seuraava askel."
+      "Luovan studion sivun pitää houkutella oikeanlaisia toimeksiantoja ja tehdä yhteydenotosta luonnollinen seuraava askel.",
+    pageBlueprints: [
+      {
+        id: "home",
+        pageType: "home",
+        slug: "/",
+        navigationLabel: "Etusivu",
+        title: "Etusivu",
+        purpose: "Näytä luova taso ja tee arvolupaus heti kiinnostavaksi",
+        navVisible: true,
+        footerVisible: true,
+        isPrimary: true
+      },
+      {
+        id: "services",
+        pageType: "services",
+        slug: "/palvelut",
+        navigationLabel: "Palvelut",
+        title: "Palvelut",
+        purpose: "Jäsennä strateginen ja luova tarjooma selkeiksi kokonaisuuksiksi",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "other",
+        pageType: "other",
+        slug: "/tyot",
+        navigationLabel: "Työt",
+        title: "Työt",
+        purpose: "Rakenna uskottavuutta referenssi- ja laatuvaikutelman kautta",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "contact",
+        pageType: "contact",
+        slug: "/aloita-projekti",
+        navigationLabel: "Aloita projekti",
+        title: "Aloita projekti",
+        purpose: "Ohjaa oikeanlaiset toimeksiannot keskusteluun tai briefiin",
+        navVisible: true,
+        footerVisible: true
+      }
+    ]
   },
   {
     id: "technology",
@@ -175,7 +362,50 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
     ],
     ctaTitle: "Ohjaa kohti demoa tai keskustelua",
     ctaBody:
-      "B2B-teknologiasivun tärkein tehtävä on siirtää oikea kävijä kohti demoa, yhteydenottoa tai muuta seuraavaa askelta."
+      "B2B-teknologiasivun tärkein tehtävä on siirtää oikea kävijä kohti demoa, yhteydenottoa tai muuta seuraavaa askelta.",
+    pageBlueprints: [
+      {
+        id: "home",
+        pageType: "home",
+        slug: "/",
+        navigationLabel: "Etusivu",
+        title: "Etusivu",
+        purpose: "Tee tuotteen arvo, hyöty ja seuraava askel heti ymmärrettäväksi",
+        navVisible: true,
+        footerVisible: true,
+        isPrimary: true
+      },
+      {
+        id: "services",
+        pageType: "services",
+        slug: "/ratkaisu",
+        navigationLabel: "Ratkaisu",
+        title: "Ratkaisu",
+        purpose: "Jäsennä tuote tai palvelu ratkaisu- ja hyötynäkökulmasta",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "other",
+        pageType: "other",
+        slug: "/demo",
+        navigationLabel: "Demo",
+        title: "Demo",
+        purpose: "Ohjaa ostotiimi kohti demoa tai tarkempaa tuotearviointia",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "contact",
+        pageType: "contact",
+        slug: "/keskustelu",
+        navigationLabel: "Keskustelu",
+        title: "Keskustelu",
+        purpose: "Ohjaa liidi demoon, keskusteluun tai muuhun seuraavaan askeleeseen",
+        navVisible: true,
+        footerVisible: true
+      }
+    ]
   }
 ];
 

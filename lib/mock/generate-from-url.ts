@@ -13,7 +13,7 @@ import type {
 } from "./projects";
 import type { StylePresetId } from "./style-presets";
 import { STYLE_PRESETS } from "./style-presets";
-import { resolveIndustryProfile } from "./industry-profiles";
+import { resolveIndustryProfile, type IndustryPageBlueprint } from "./industry-profiles";
 import { applyStylePresetToContent } from "./apply-style-preset";
 import { buildSectionPlan } from "./section-plans";
 import type { SourceSnapshot } from "../source/source-snapshot";
@@ -134,7 +134,7 @@ function buildSiteSEO(input: {
 
 function buildPageSEO(input: {
   pageId: string;
-  pageType: "home" | "about" | "services" | "contact";
+  pageType: "home" | "about" | "services" | "contact" | "landing" | "other";
   pagePurpose: string;
   slug: string;
   title: string;
@@ -225,7 +225,9 @@ function buildCTAs(input: {
   ];
 }
 
-function buildTrustItems(testimonials: Extract<RedesignSection, { type: "testimonials" }>): TrustItem[] {
+function buildTrustItems(
+  testimonials: Extract<RedesignSection, { type: "testimonials" }>
+): TrustItem[] {
   return testimonials.items.map((item, index) => ({
     id: `trust-testimonial-${index + 1}`,
     type: "testimonial",
@@ -235,7 +237,9 @@ function buildTrustItems(testimonials: Extract<RedesignSection, { type: "testimo
   }));
 }
 
-function servicesToSectionItems(section: Extract<RedesignSection, { type: "services" }>) {
+function servicesToSectionItems(
+  section: Extract<RedesignSection, { type: "services" }>
+) {
   return section.items.map((item, index) => ({
     id: `service-item-${index + 1}`,
     title: item.title,
@@ -322,254 +326,274 @@ function buildStructuredHomeSections(input: {
   return input.orderedLegacySections.map((section) => sectionMap[section.type]);
 }
 
+function buildAboutSections(companyName: string, testimonialsTitle: string): ProjectSection[] {
+  return [
+    {
+      id: "about-company",
+      type: "about",
+      sectionRole: "trust-building",
+      heading: `${companyName} yrityksenä`,
+      body:
+        "Tämän sivun tarkoitus on tehdä yrityksen toimintatavasta, kokemuksesta ja luotettavuudesta näkyvämpi osa kokonaisuutta.",
+      ctaIds: [],
+      trustItemIds: [],
+      assetSlotIds: []
+    },
+    {
+      id: "about-testimonials",
+      type: "testimonials",
+      sectionRole: "trust-building",
+      heading: testimonialsTitle,
+      ctaIds: [],
+      trustItemIds: ["trust-testimonial-1", "trust-testimonial-2"],
+      assetSlotIds: []
+    },
+    {
+      id: "about-cta",
+      type: "cta",
+      sectionRole: "conversion",
+      heading: "Keskustellaan projektistasi",
+      body:
+        "Yrityssivun tehtävä ei ole vain kertoa historiasta, vaan tukea seuraavaa askelta kohti yhteydenottoa.",
+      ctaIds: ["cta-final-contact"],
+      trustItemIds: [],
+      assetSlotIds: []
+    }
+  ];
+}
+
+function buildServicesSections(
+  servicesSection: Extract<RedesignSection, { type: "services" }>
+): ProjectSection[] {
+  return [
+    {
+      id: "services-overview",
+      type: "services",
+      sectionRole: "service-overview",
+      heading: servicesSection.title,
+      items: servicesToSectionItems(servicesSection),
+      ctaIds: [],
+      trustItemIds: [],
+      assetSlotIds: []
+    },
+    {
+      id: "services-supporting",
+      type: "about",
+      sectionRole: "supporting",
+      heading: "Miten palvelusivu toimii paremmin",
+      body:
+        "Palvelusivun tarkoitus on tehdä tarjoomasta helposti ymmärrettävä, tukea päätöksentekoa ja ohjata kävijä suoraan oikeaan toimintoon.",
+      ctaIds: [],
+      trustItemIds: [],
+      assetSlotIds: []
+    },
+    {
+      id: "services-cta",
+      type: "cta",
+      sectionRole: "conversion",
+      heading: "Pyydä tarjous oikeasta palvelusta",
+      body:
+        "Kun palvelut on jäsennelty selkeästi, kiinnostunut kävijä etenee helpommin yhteydenottoon.",
+      ctaIds: ["cta-home-primary"],
+      trustItemIds: [],
+      assetSlotIds: []
+    }
+  ];
+}
+
+function buildContactSections(
+  ctaTitle: string,
+  ctaBody: string
+): ProjectSection[] {
+  return [
+    {
+      id: "contact-about",
+      type: "about",
+      sectionRole: "conversion",
+      heading: "Ota yhteyttä",
+      body:
+        "Yhteyssivun tehtävä on poistaa kitkaa ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo.",
+      ctaIds: [],
+      trustItemIds: [],
+      assetSlotIds: []
+    },
+    {
+      id: "contact-cta",
+      type: "cta",
+      sectionRole: "conversion",
+      heading: ctaTitle,
+      body: ctaBody,
+      ctaIds: ["cta-final-contact"],
+      trustItemIds: [],
+      assetSlotIds: []
+    }
+  ];
+}
+
+function buildOtherSections(
+  companyName: string,
+  blueprint: IndustryPageBlueprint
+): ProjectSection[] {
+  return [
+    {
+      id: `${blueprint.id}-intro`,
+      type: "about",
+      sectionRole: "supporting",
+      heading: blueprint.title,
+      body: `${companyName} tarvitsee sivun, jonka tarkoitus on: ${blueprint.purpose.toLowerCase()}.`,
+      ctaIds: [],
+      trustItemIds: [],
+      assetSlotIds: []
+    },
+    {
+      id: `${blueprint.id}-cta`,
+      type: "cta",
+      sectionRole: "conversion",
+      heading: "Jatketaan seuraavaan askeleeseen",
+      body:
+        "Tämän sivun pitää tukea selkeästi yhtä tarkoitusta ja ohjata kävijä eteenpäin ilman kitkaa.",
+      ctaIds: ["cta-final-contact"],
+      trustItemIds: [],
+      assetSlotIds: []
+    }
+  ];
+}
+
+function inferSearchIntent(pageType: IndustryPageBlueprint["pageType"]): string {
+  switch (pageType) {
+    case "home":
+      return "homepage conversion";
+    case "services":
+      return "service discovery";
+    case "about":
+      return "company credibility";
+    case "contact":
+      return "contact conversion";
+    default:
+      return "supporting page intent";
+  }
+}
+
+function inferSchemaType(pageType: IndustryPageBlueprint["pageType"]): string {
+  switch (pageType) {
+    case "home":
+      return "WebPage";
+    case "services":
+      return "CollectionPage";
+    case "about":
+      return "AboutPage";
+    case "contact":
+      return "ContactPage";
+    default:
+      return "WebPage";
+  }
+}
+
 function buildPages(input: {
   companyName: string;
-  siteProfile: {
-    industry: string;
-    audience: string;
-  };
+  industryProfile: ReturnType<typeof resolveIndustryProfile>;
   siteSEO: SiteSEO;
   servicesSection: Extract<RedesignSection, { type: "services" }>;
-  aboutSection: Extract<RedesignSection, { type: "about" }>;
   testimonialsSection: Extract<RedesignSection, { type: "testimonials" }>;
   ctaSection: Extract<RedesignSection, { type: "cta" }>;
   homeSections: ProjectSection[];
 }): { sitemap: SitemapItem[]; pages: ProjectPage[] } {
-  const primaryLocation = input.siteProfile.audience;
   const targetServices = input.servicesSection.items.map((item) => item.title);
+  const targetLocations = [input.industryProfile.audience];
 
-  const sitemap: SitemapItem[] = [
-    {
-      pageId: "home",
-      slug: "/",
-      pageType: "home",
-      title: "Etusivu",
-      purpose: "Esittele pääarvolupaus, palvelut ja ensisijainen CTA",
-      navigationLabel: "Etusivu",
-      navVisible: true,
-      footerVisible: true,
-      isPrimary: true
-    },
-    {
-      pageId: "about",
-      slug: "/yritys",
-      pageType: "about",
-      title: "Yritys",
-      purpose: "Rakenna luottamusta ja kerro yrityksestä",
-      navigationLabel: "Yritys",
-      navVisible: true,
-      footerVisible: true
-    },
-    {
-      pageId: "services",
-      slug: "/palvelut",
-      pageType: "services",
-      title: "Palvelut",
-      purpose: "Jäsennä tarjooma selkeiksi palvelukokonaisuuksiksi",
-      navigationLabel: "Palvelut",
-      navVisible: true,
-      footerVisible: true
-    },
-    {
-      pageId: "contact",
-      slug: "/yhteys",
-      pageType: "contact",
-      title: "Yhteys",
-      purpose: "Ohjaa kävijä yhteydenottoon tai tarjouspyyntöön",
-      navigationLabel: "Yhteys",
-      navVisible: true,
-      footerVisible: true
+  const sitemap: SitemapItem[] = input.industryProfile.pageBlueprints.map((blueprint) => ({
+    pageId: blueprint.id,
+    slug: blueprint.slug,
+    pageType: blueprint.pageType,
+    title: blueprint.title,
+    purpose: blueprint.purpose,
+    navigationLabel: blueprint.navigationLabel,
+    navVisible: blueprint.navVisible,
+    footerVisible: blueprint.footerVisible,
+    isPrimary: blueprint.isPrimary
+  }));
+
+  const pages: ProjectPage[] = input.industryProfile.pageBlueprints.map((blueprint) => {
+    let sections: ProjectSection[];
+
+    switch (blueprint.pageType) {
+      case "home":
+        sections = input.homeSections;
+        break;
+      case "about":
+        sections = buildAboutSections(input.companyName, input.testimonialsSection.title);
+        break;
+      case "services":
+        sections = buildServicesSections(input.servicesSection);
+        break;
+      case "contact":
+        sections = buildContactSections(input.ctaSection.title, input.ctaSection.body);
+        break;
+      default:
+        sections = buildOtherSections(input.companyName, blueprint);
+        break;
     }
-  ];
 
-  const homeSEO = buildPageSEO({
-    pageId: "home",
-    pageType: "home",
-    pagePurpose: sitemap[0].purpose,
-    slug: "/",
-    title: `${input.siteProfile.industry} ${input.siteProfile.audience}`,
-    metaDescription:
-      input.siteSEO.defaultMetaDescription ||
-      `${input.companyName} tarjoaa palveluitaan selkeästi ja yhteydenottoon ohjaavasti.`,
-    h1: input.homeSections.find((section) => section.type === "hero")?.heading || `${input.companyName} palvelut`,
-    primaryTopic: input.siteProfile.industry,
-    secondaryTopics: [input.siteProfile.audience],
-    searchIntent: "homepage conversion",
-    schemaType: "WebPage",
-    internalLinkTargets: ["/palvelut", "/yritys", "/yhteys"],
-    targetLocations: [primaryLocation],
-    targetServices,
-    ogTitle: `${input.siteProfile.industry} ${input.siteProfile.audience}`,
-    ogDescription: input.siteSEO.defaultMetaDescription,
-    ogImageAssetSlot: "asset-og-home"
+    const h1 =
+      sections.find((section) => section.type === "hero")?.heading ??
+      sections[0]?.heading ??
+      blueprint.title;
+
+    const title =
+      blueprint.pageType === "home"
+        ? `${input.industryProfile.label} ${input.industryProfile.audience}`
+        : blueprint.title === blueprint.navigationLabel
+          ? `${blueprint.title} | ${input.companyName}`
+          : `${blueprint.title}`;
+
+    const metaDescription =
+      blueprint.pageType === "home"
+        ? input.siteSEO.defaultMetaDescription
+        : `${input.companyName}: ${blueprint.purpose}.`;
+
+    const secondaryTopics =
+      blueprint.pageType === "services"
+        ? targetServices
+        : blueprint.pageType === "about"
+          ? ["luotettavuus", "kokemus", "toimintatapa"]
+          : blueprint.pageType === "contact"
+            ? ["yhteydenotto", "seuraava askel"]
+            : [blueprint.purpose];
+
+    return {
+      pageId: blueprint.id,
+      slug: blueprint.slug,
+      pageType: blueprint.pageType,
+      title: blueprint.title,
+      purpose: blueprint.purpose,
+      navigationLabel: blueprint.navigationLabel,
+      navVisible: blueprint.navVisible,
+      footerVisible: blueprint.footerVisible,
+      isPrimary: blueprint.isPrimary,
+      pageSEO: buildPageSEO({
+        pageId: blueprint.id,
+        pageType: blueprint.pageType,
+        pagePurpose: blueprint.purpose,
+        slug: blueprint.slug,
+        title,
+        metaDescription,
+        h1,
+        primaryTopic: blueprint.purpose,
+        secondaryTopics,
+        searchIntent: inferSearchIntent(blueprint.pageType),
+        schemaType: inferSchemaType(blueprint.pageType),
+        internalLinkTargets: sitemap
+          .filter((item) => item.pageId !== blueprint.id)
+          .map((item) => item.slug),
+        targetLocations,
+        targetServices: blueprint.pageType === "services" ? targetServices : [],
+        ogTitle: title,
+        ogDescription: metaDescription,
+        ogImageAssetSlot: blueprint.pageType === "home" ? "asset-og-home" : "asset-og-default"
+      }),
+      sections
+    };
   });
-
-  const aboutSEO = buildPageSEO({
-    pageId: "about",
-    pageType: "about",
-    pagePurpose: sitemap[1].purpose,
-    slug: "/yritys",
-    title: `${input.companyName} yrityksenä`,
-    metaDescription:
-      `Tutustu ${input.companyName} yritykseen, toimintatapaan ja siihen, miksi se on uskottava valinta.`,
-    h1: `${input.companyName} yrityksenä`,
-    primaryTopic: `${input.companyName} yrityksenä`,
-    secondaryTopics: ["kokemus", "luotettavuus", "toimintatapa"],
-    searchIntent: "company credibility",
-    schemaType: "AboutPage",
-    internalLinkTargets: ["/", "/palvelut", "/yhteys"],
-    targetLocations: [primaryLocation],
-    targetServices: [],
-    ogImageAssetSlot: "asset-og-default"
-  });
-
-  const servicesSEO = buildPageSEO({
-    pageId: "services",
-    pageType: "services",
-    pagePurpose: sitemap[2].purpose,
-    slug: "/palvelut",
-    title: `${input.siteProfile.industry} palvelut`,
-    metaDescription:
-      `${input.companyName} palvelut selkeästi jäsenneltynä. Tutustu tarjoomaan ja löydä oikea seuraava askel.`,
-    h1: `${input.siteProfile.industry} palvelut`,
-    primaryTopic: `${input.siteProfile.industry} palvelut`,
-    secondaryTopics: ["tarjooma", "palvelukokonaisuudet"],
-    searchIntent: "service discovery",
-    schemaType: "CollectionPage",
-    internalLinkTargets: ["/", "/yritys", "/yhteys"],
-    targetLocations: [primaryLocation],
-    targetServices,
-    ogImageAssetSlot: "asset-og-default"
-  });
-
-  const contactSEO = buildPageSEO({
-    pageId: "contact",
-    pageType: "contact",
-    pagePurpose: sitemap[3].purpose,
-    slug: "/yhteys",
-    title: `Ota yhteyttä | ${input.companyName}`,
-    metaDescription:
-      `Ota yhteyttä ${input.companyName} ja pyydä tarjous tai aloita keskustelu projektistasi helposti.`,
-    h1: "Ota yhteyttä",
-    primaryTopic: `Yhteydenotto ${input.companyName}`,
-    secondaryTopics: ["tarjouspyyntö", "yhteystiedot"],
-    searchIntent: "contact conversion",
-    schemaType: "ContactPage",
-    internalLinkTargets: ["/", "/palvelut", "/yritys"],
-    targetLocations: [primaryLocation],
-    targetServices: [],
-    ogImageAssetSlot: "asset-og-default"
-  });
-
-  const pages: ProjectPage[] = [
-    {
-      ...sitemap[0],
-      pageSEO: homeSEO,
-      sections: input.homeSections
-    },
-    {
-      ...sitemap[1],
-      pageSEO: aboutSEO,
-      sections: [
-        {
-          id: "about-company",
-          type: "about",
-          sectionRole: "trust-building",
-          heading: `${input.companyName} yrityksenä`,
-          body:
-            "Tämän sivun tarkoitus on tehdä yrityksen toimintatavasta, kokemuksesta ja luotettavuudesta näkyvämpi osa kokonaisuutta.",
-          ctaIds: [],
-          trustItemIds: [],
-          assetSlotIds: []
-        },
-        {
-          id: "about-testimonials",
-          type: "testimonials",
-          sectionRole: "trust-building",
-          heading: input.testimonialsSection.title,
-          ctaIds: [],
-          trustItemIds: ["trust-testimonial-1", "trust-testimonial-2"],
-          assetSlotIds: []
-        },
-        {
-          id: "about-cta",
-          type: "cta",
-          sectionRole: "conversion",
-          heading: "Keskustellaan projektistasi",
-          body:
-            "Yrityssivun tehtävä ei ole vain kertoa historiasta, vaan tukea seuraavaa askelta kohti yhteydenottoa.",
-          ctaIds: ["cta-final-contact"],
-          trustItemIds: [],
-          assetSlotIds: []
-        }
-      ]
-    },
-    {
-      ...sitemap[2],
-      pageSEO: servicesSEO,
-      sections: [
-        {
-          id: "services-overview",
-          type: "services",
-          sectionRole: "service-overview",
-          heading: input.servicesSection.title,
-          items: servicesToSectionItems(input.servicesSection),
-          ctaIds: [],
-          trustItemIds: [],
-          assetSlotIds: []
-        },
-        {
-          id: "services-supporting",
-          type: "about",
-          sectionRole: "supporting",
-          heading: "Miten palvelusivu toimii paremmin",
-          body:
-            "Palvelusivun tarkoitus on tehdä tarjoomasta helposti ymmärrettävä, tukea päätöksentekoa ja ohjata kävijä suoraan oikeaan toimintoon.",
-          ctaIds: [],
-          trustItemIds: [],
-          assetSlotIds: []
-        },
-        {
-          id: "services-cta",
-          type: "cta",
-          sectionRole: "conversion",
-          heading: "Pyydä tarjous oikeasta palvelusta",
-          body:
-            "Kun palvelut on jäsennelty selkeästi, kiinnostunut kävijä etenee helpommin yhteydenottoon.",
-          ctaIds: ["cta-home-primary"],
-          trustItemIds: [],
-          assetSlotIds: []
-        }
-      ]
-    },
-    {
-      ...sitemap[3],
-      pageSEO: contactSEO,
-      sections: [
-        {
-          id: "contact-about",
-          type: "about",
-          sectionRole: "conversion",
-          heading: "Ota yhteyttä",
-          body:
-            "Yhteyssivun tehtävä on poistaa kitkaa ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo.",
-          ctaIds: [],
-          trustItemIds: [],
-          assetSlotIds: []
-        },
-        {
-          id: "contact-cta",
-          type: "cta",
-          sectionRole: "conversion",
-          heading: input.ctaSection.title,
-          body: input.ctaSection.body,
-          ctaIds: ["cta-final-contact"],
-          trustItemIds: [],
-          assetSlotIds: []
-        }
-      ]
-    }
-  ];
 
   return { sitemap, pages };
 }
@@ -694,13 +718,9 @@ export function buildProjectFromSourceSnapshot(
 
   const { sitemap, pages } = buildPages({
     companyName,
-    siteProfile: {
-      industry: industryProfile.label,
-      audience: industryProfile.audience
-    },
+    industryProfile,
     siteSEO,
     servicesSection,
-    aboutSection,
     testimonialsSection,
     ctaSection,
     homeSections
