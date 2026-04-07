@@ -1,28 +1,29 @@
-import Link from "next/link";
+import { SiteHeader } from "@/components/layout/site-header";
+import { ProjectListClient } from "@/components/projects/project-list-client";
 import { mockProjects } from "@/lib/mock/projects";
 
 export default function ProjectsPage() {
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
-      <h1 className="text-3xl font-semibold">Projektit</h1>
+    <main className="min-h-screen">
+      <SiteHeader />
 
-      <div className="grid gap-4">
-        {mockProjects.map((project) => (
-          <Link
-            key={project.id}
-            href={`/projects/${project.id}`}
-            className="block border rounded-xl p-5 hover:bg-neutral-50"
-          >
-            <h2 className="text-2xl font-semibold">
-              {project.siteProfile.companyName}
-            </h2>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10 md:px-10 md:py-14">
+        <section className="space-y-2">
+          <p className="text-sm uppercase tracking-[0.24em] text-sky-300/80">
+            Project workspace
+          </p>
+          <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
+            Projektit
+          </h1>
+          <p className="max-w-2xl text-sm leading-6 text-white/65 md:text-base">
+            Tämä näkymä näyttää kaikki redesign-projektit samassa rakenteessa kuin
+            etusivun dashboard. Järjestys, tila ja yrityskohtainen konteksti pitää
+            olla nopeasti hahmotettavissa.
+          </p>
+        </section>
 
-            <p className="text-sm text-neutral-600 mt-1">
-              {project.businessSummary}
-            </p>
-          </Link>
-        ))}
+        <ProjectListClient projects={mockProjects} />
       </div>
-    </div>
+    </main>
   );
 }
