@@ -1,9 +1,11 @@
 import { generateProjectFromUrl } from "@/lib/mock/generate-from-url";
 import { PreviewSectionRenderer } from "@/components/projects/preview-section-renderer";
 import { CompanyBriefDebug } from "@/components/projects/company-brief-debug";
+import { GenerateProjectForm } from "@/components/projects/generate-project-form";
 
 type SearchParams = Promise<{
   url?: string;
+  industryId?: string;
   stylePreset?: string;
 }>;
 
@@ -13,10 +15,39 @@ type Props = {
 
 export default async function GeneratedPage({ searchParams }: Props) {
   const params = await searchParams;
-  const url = params.url ?? "https://example.com";
-  const stylePreset = params.stylePreset;
+  const url = params.url ?? "";
+  const industryId = params.industryId ?? "contractor";
+  const stylePreset = params.stylePreset ?? "premium-dark";
 
-  const project = await generateProjectFromUrl(url, { stylePreset });
+  if (!url) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-8 px-6 py-10">
+        <div className="space-y-2">
+          <p className="text-sm font-medium uppercase tracking-[0.18em] text-neutral-500">
+            Structured project generation
+          </p>
+          <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
+            Luo uusi redesign-projekti
+          </h1>
+          <p className="max-w-2xl text-neutral-600">
+            Valitse URL, industry ja style preset. Industry on nyt controlled input,
+            ei automaattisen arvauksen varassa.
+          </p>
+        </div>
+
+        <GenerateProjectForm
+          defaultUrl=""
+          defaultIndustryId={industryId}
+          defaultStylePreset={stylePreset}
+        />
+      </div>
+    );
+  }
+
+  const project = await generateProjectFromUrl(url, {
+    stylePreset,
+    industryId
+  });
 
   const pageId =
     project.sitemap.find((item) => item.isPrimary)?.pageId ??
@@ -34,6 +65,12 @@ export default async function GeneratedPage({ searchParams }: Props) {
         </h1>
         <p className="max-w-3xl text-neutral-600">{project.businessSummary}</p>
       </div>
+
+      <GenerateProjectForm
+        defaultUrl={url}
+        defaultIndustryId={industryId}
+        defaultStylePreset={stylePreset}
+      />
 
       <CompanyBriefDebug project={project} />
 

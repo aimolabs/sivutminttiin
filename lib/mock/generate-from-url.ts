@@ -12,7 +12,7 @@ import type {
 } from "./projects";
 import type { StylePresetId } from "./style-presets";
 import { STYLE_PRESETS } from "./style-presets";
-import { resolveIndustryProfile } from "./industry-profiles";
+import { getIndustryProfileById } from "./industry-profiles";
 import type { SourceSnapshot } from "../source/source-snapshot";
 import { fetchSourceSnapshot } from "../source/fetch-source-snapshot";
 import {
@@ -428,22 +428,31 @@ function buildPageSEO(input: {
 
 export async function buildProjectFromSourceSnapshot(
   rawSnapshot: SourceSnapshot,
-  options?: { stylePreset?: string }
+  options?: { stylePreset?: string; industryId?: string }
 ): Promise<Project> {
   const snapshot = normalizeSourceSnapshot(rawSnapshot);
-  const signals = inferCompanySignals(snapshot);
-  const archetypeId = resolveCompanyArchetypeId(signals);
-  signals.companyArchetypeId = archetypeId;
+  const inferredSignals = inferCompanySignals(snapshot);
 
   const companyName = snapshot.companyNameCandidate || domainToCompanyName(snapshot.domain);
   const stylePreset = resolveStylePreset(options?.stylePreset);
   const styleDirection = buildStyleDirection(stylePreset);
-  const industryProfile = resolveIndustryProfile(snapshot.industrySignalText);
-  const archetype = getCompanyArchetype(archetypeId);
+  const industryProfile = getIndustryProfileById(options?.industryId);
   const sourceAnalysis = analyzeSourceSnapshot(snapshot, companyName);
   const briefProvider = getCompanyBriefProvider();
 
   const companyBrief = await briefProvider.buildBrief({ snapshot });
+
+  if (options?.industryId) {
+    companyBrief.inferredIndustryId = options.industryId;
+    companyBrief.targetAudienceSummary = industryProfile.audience;
+  }
+
+  const signals: CompanySignals = {
+    ...inferredSignals,
+    industryId: options?.industryId ?? inferredSignals.industryId
+  };
+
+  const archetype = getCompanyArchetype(companyBrief.archetypeId);
 
   const sitemap: SitemapItem[] = companyBrief.recommendedPageSet.map((page) => ({
     pageId: page.id,
@@ -561,7 +570,7 @@ export async function buildProjectFromSourceSnapshot(
     id: "generated",
     input: {
       sourceUrl: snapshot.sourceUrl,
-      industryId: signals.industryId,
+      industryId: options?.industryId ?? signals.industryId,
       stylePreset
     },
     siteProfile: {
@@ -594,7 +603,7 @@ export async function buildProjectFromSourceSnapshot(
 
 export async function generateProjectFromUrl(
   url: string,
-  options?: { stylePreset?: string }
+  options?: { stylePreset?: string; industryId?: string }
 ): Promise<Project> {
   const snapshot = await fetchSourceSnapshot(url);
   return buildProjectFromSourceSnapshot(snapshot, options);

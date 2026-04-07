@@ -108,36 +108,36 @@ export const DEFAULT_INDUSTRY_PROFILE: IndustryProfile = {
 
 export const INDUSTRY_PROFILES: IndustryProfile[] = [
   {
-    id: "construction",
-    label: "Rakennus ja remontointi",
-    audience: "Kotitaloudet ja kiinteistöjen omistajat",
-    tone: "Luotettava ja käytännöllinen",
-    heroEyebrow: "Rakennus ja remontointi",
+    id: "restaurant",
+    label: "Ravintola",
+    audience: "Paikalliset asiakkaat ja noutoasiakkaat",
+    tone: "Houkutteleva ja helposti lähestyttävä",
+    heroEyebrow: "Ravintola",
     heroHeadlineTemplate: (companyName) =>
-      `${companyName} tarvitsee verkkosivun, joka näyttää yhtä luotettavalta kuin työnjälki.`,
+      `${companyName} tarvitsee sivun, joka tekee menusta, tunnelmasta ja tilaamisesta houkuttelevia heti.`,
     heroSubheadline:
-      "Konsepti tekee palveluista, luottamuksesta ja tarjouspyynnöstä heti selkeämmät. Sivun pitää näyttää siltä, että yritys osaa työnsä jo ennen ensimmäistä yhteydenottoa.",
-    serviceSectionTitle: "Palvelut nopeasti ymmärrettäviksi",
+      "Ravintolan sivun pitää tehdä tarjonta, fiilis ja tilaamisen seuraava askel nopeasti ymmärrettäviksi.",
+    serviceSectionTitle: "Menu ja tarjonta näkyviksi",
     serviceItems: [
       {
-        title: "Remontit",
+        title: "Suosikit",
         description:
-          "Yleisimmät remonttipalvelut nostetaan heti näkyviin, jotta kävijä tunnistaa oikean palvelun nopeasti."
+          "Tärkeimmät annokset ja kategoriat pitää tehdä nopeasti selattaviksi."
       },
       {
-        title: "Rakennustyöt",
+        title: "Nouto ja tilaus",
         description:
-          "Laajemmat toteutukset esitetään selkeästi ja uskottavasti ilman raskasta listamaisuutta."
+          "Tilaamisen tapa ja seuraava askel pitää olla täysin selkeä."
       },
       {
-        title: "Luotettava toteutus",
+        title: "Tunnelma",
         description:
-          "Työtapa, kokemus ja yhteydenoton helppous rakennetaan näkyväksi osaksi etusivua."
+          "Ravintolan fiilis ja asioinnin helppous pitää tuntua heti."
       }
     ],
-    ctaTitle: "Pyydä tarjous matalalla kynnyksellä",
+    ctaTitle: "Tee tilauksesta helppo",
     ctaBody:
-      "Rakennusalan sivun tärkein tehtävä on poistaa epävarmuutta ja tehdä ensimmäisestä yhteydenotosta mahdollisimman helppo.",
+      "Ravintolasivun tärkein tehtävä on tehdä tilaamisesta tai käynnistä mahdollisimman mutkaton.",
     pageBlueprints: [
       {
         id: "home",
@@ -145,7 +145,157 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
         slug: "/",
         navigationLabel: "Etusivu",
         title: "Etusivu",
-        purpose: "Esittele pääarvolupaus, tärkeimmät palvelut ja tarjouspyynnön CTA",
+        purpose: "Tee menu, tunnelma ja tilaaminen houkutteleviksi heti",
+        navVisible: true,
+        footerVisible: true,
+        isPrimary: true
+      },
+      {
+        id: "menu",
+        pageType: "services",
+        slug: "/menu",
+        navigationLabel: "Menu",
+        title: "Menu",
+        purpose: "Jäsennä tarjonta helposti selattavaan muotoon",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "restaurant",
+        pageType: "about",
+        slug: "/ravintola",
+        navigationLabel: "Ravintola",
+        title: "Ravintola",
+        purpose: "Näytä tunnelma, sijainti ja asioinnin helppous",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "order",
+        pageType: "contact",
+        slug: "/tilaa",
+        navigationLabel: "Tilaa",
+        title: "Tilaa",
+        purpose: "Ohjaa kävijä tekemään tilaus tai tulemaan paikan päälle",
+        navVisible: true,
+        footerVisible: true
+      }
+    ]
+  },
+  {
+    id: "flower-shop",
+    label: "Kukkakauppa",
+    audience: "Paikalliset lahja- ja arkiostajat sekä yritysasiakkaat",
+    tone: "Lämmin ja laadukas",
+    heroEyebrow: "Kukkakauppa",
+    heroHeadlineTemplate: (companyName) =>
+      `${companyName} tarvitsee sivun, joka tekee kukkalähetyksestä ja toimituksesta helpon heti ensisilmäyksellä.`,
+    heroSubheadline:
+      "Kukkakaupan sivun pitää tehdä valikoima, toimitus ja tilaamisen helppous nopeasti ymmärrettäviksi.",
+    serviceSectionTitle: "Valikoima helposti hahmotettavaksi",
+    serviceItems: [
+      {
+        title: "Kimput ja sidonnat",
+        description:
+          "Valikoima kannattaa jäsentää tilanteiden ja ostotapojen kautta."
+      },
+      {
+        title: "Toimitus",
+        description:
+          "Toimitusalue ja nopeus pitää tehdä selväksi heti."
+      },
+      {
+        title: "Yritystilaukset",
+        description:
+          "Yritysasiakkaiden tarpeet kannattaa nostaa omaksi uskottavaksi osa-alueekseen."
+      }
+    ],
+    ctaTitle: "Tilaa kukkia helposti",
+    ctaBody:
+      "Sivun tärkein tehtävä on tehdä tilaamisesta, toimituksesta ja valikoimasta mahdollisimman helppoa.",
+    pageBlueprints: [
+      {
+        id: "home",
+        pageType: "home",
+        slug: "/",
+        navigationLabel: "Etusivu",
+        title: "Etusivu",
+        purpose: "Tee valikoima, toimitus ja tilaaminen nopeasti ymmärrettäviksi",
+        navVisible: true,
+        footerVisible: true,
+        isPrimary: true
+      },
+      {
+        id: "selection",
+        pageType: "services",
+        slug: "/valikoima",
+        navigationLabel: "Valikoima",
+        title: "Valikoima",
+        purpose: "Jäsennä kukat, sidonnat ja tilanteet helposti hahmotettaviksi",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "delivery",
+        pageType: "about",
+        slug: "/toimitus",
+        navigationLabel: "Toimitus",
+        title: "Toimitus",
+        purpose: "Rakenna luottamusta toimitusalueen, palvelun ja asioinnin kautta",
+        navVisible: true,
+        footerVisible: true
+      },
+      {
+        id: "order",
+        pageType: "contact",
+        slug: "/tilaa",
+        navigationLabel: "Tilaa",
+        title: "Tilaa",
+        purpose: "Ohjaa kävijä tilaamaan tai ottamaan yhteyttä nopeasti",
+        navVisible: true,
+        footerVisible: true
+      }
+    ]
+  },
+  {
+    id: "contractor",
+    label: "Rakennus ja remontointi",
+    audience: "Kotitaloudet ja kiinteistöjen omistajat",
+    tone: "Luotettava ja käytännöllinen",
+    heroEyebrow: "Rakennus ja remontointi",
+    heroHeadlineTemplate: (companyName) =>
+      `${companyName} tarvitsee sivun, jossa palvelut ja luotettava vaikutelma näkyvät heti.`,
+    heroSubheadline:
+      "Sivun pitää vähentää epävarmuutta, nostaa tärkeimmät palvelut näkyviin ja tehdä tarjouspyynnöstä helppo.",
+    serviceSectionTitle: "Palvelut nopeasti ymmärrettäviksi",
+    serviceItems: [
+      {
+        title: "Remontit",
+        description:
+          "Yleisimmät remonttipalvelut pitää nostaa nopeasti näkyviin."
+      },
+      {
+        title: "Rakennustyöt",
+        description:
+          "Laajemmat toteutukset pitää esittää selkeästi ja uskottavasti."
+      },
+      {
+        title: "Luotettava toteutus",
+        description:
+          "Työtapa, kokemus ja yhteydenoton helppous pitää tehdä näkyviksi."
+      }
+    ],
+    ctaTitle: "Pyydä tarjous matalalla kynnyksellä",
+    ctaBody:
+      "Tämän sivun tärkein tehtävä on poistaa epävarmuutta ja tehdä tarjouspyynnöstä mahdollisimman helppo.",
+    pageBlueprints: [
+      {
+        id: "home",
+        pageType: "home",
+        slug: "/",
+        navigationLabel: "Etusivu",
+        title: "Etusivu",
+        purpose: "Esittele tärkeimmät palvelut, luotettava vaikutelma ja tarjouspyyntö",
         navVisible: true,
         footerVisible: true,
         isPrimary: true
@@ -156,27 +306,27 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
         slug: "/palvelut",
         navigationLabel: "Palvelut",
         title: "Palvelut",
-        purpose: "Jäsennä remontti- ja rakennuspalvelut helposti hahmotettaviksi",
+        purpose: "Jäsennä remontti- ja rakennuspalvelut selkeiksi kokonaisuuksiksi",
         navVisible: true,
         footerVisible: true
       },
       {
-        id: "about",
+        id: "company",
         pageType: "about",
         slug: "/yritys",
         navigationLabel: "Yritys",
         title: "Yritys",
-        purpose: "Rakenna luottamusta kokemuksen, toimintatavan ja työnjäljen kautta",
+        purpose: "Rakenna luottamusta kokemuksen, toimintatavan ja luotettavuuden kautta",
         navVisible: true,
         footerVisible: true
       },
       {
-        id: "contact",
+        id: "quote",
         pageType: "contact",
         slug: "/pyyda-tarjous",
         navigationLabel: "Pyydä tarjous",
         title: "Pyydä tarjous",
-        purpose: "Poista kitkaa tarjouspyynnöstä ja ohjaa kävijä yhteydenottoon",
+        purpose: "Poista kitkaa tarjouspyynnöstä ja tee yhteydenotosta nopea",
         navVisible: true,
         footerVisible: true
       }
@@ -189,30 +339,30 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
     tone: "Asiantunteva ja rauhallinen",
     heroEyebrow: "Lakipalvelut",
     heroHeadlineTemplate: (companyName) =>
-      `${companyName} tarvitsee verkkosivun, joka viestii asiantuntemusta heti ensisilmäyksellä.`,
+      `${companyName} tarvitsee sivun, joka viestii asiantuntemusta ja turvallista ensikontaktia heti.`,
     heroSubheadline:
-      "Lakipalveluissa uskottavuus syntyy selkeydestä, rauhallisuudesta ja siitä, että asiakas ymmärtää nopeasti missä asioissa apua on saatavilla.",
-    serviceSectionTitle: "Palvelualueet selkeästi esiin",
+      "Sivun pitää tehdä selväksi missä tilanteissa apua saa ja miksi ensimmäinen yhteydenotto tuntuu turvalliselta.",
+    serviceSectionTitle: "Osaamisalueet selkeästi esiin",
     serviceItems: [
       {
-        title: "Ydinosaaminen",
+        title: "Yritysjuridiikka",
         description:
-          "Keskeiset oikeudelliset palvelut kuvataan tiiviisti ja vakuuttavasti ilman vaikeaselkoista jargonia."
+          "Osaaminen kannattaa kuvata asiakkaan tilanteiden kautta."
       },
       {
-        title: "Asiakastilanteet",
+        title: "Yksityisasiakkaan tilanteet",
         description:
-          "Sivu auttaa kävijää tunnistamaan nopeasti, missä tilanteissa juuri tämä toimisto voi auttaa."
+          "Kävijän pitää tunnistaa nopeasti missä tilanteissa apua on saatavilla."
       },
       {
         title: "Luottamus ja prosessi",
         description:
-          "Yhteydenoton tapa, toimintamalli ja asiantuntijuus rakennetaan näkyviksi jo etusivulla."
+          "Asiantuntijuus, toimintatapa ja turvallinen yhteydenotto pitää tehdä näkyviksi."
       }
     ],
-    ctaTitle: "Tee yhteydenotosta turvallinen",
+    ctaTitle: "Aloita keskustelu turvallisesti",
     ctaBody:
-      "Lakipalveluissa CTA:n pitää tuntua selkeältä, rauhalliselta ja matalariskiseltä ensimmäiseltä askeleelta.",
+      "Tämän sivun tärkein tehtävä on tehdä yhteydenotosta selkeä, rauhallinen ja matalariskinen.",
     pageBlueprints: [
       {
         id: "home",
@@ -220,28 +370,28 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
         slug: "/",
         navigationLabel: "Etusivu",
         title: "Etusivu",
-        purpose: "Esittele ydinosaaminen ja tee ensimmäisestä yhteydenotosta turvallinen",
+        purpose: "Esittele asiantuntijuus, tilanteet joissa autetaan ja turvallinen yhteydenotto",
         navVisible: true,
         footerVisible: true,
         isPrimary: true
       },
       {
-        id: "services",
+        id: "expertise",
         pageType: "services",
         slug: "/osaamisalueet",
         navigationLabel: "Osaamisalueet",
         title: "Osaamisalueet",
-        purpose: "Jäsennä oikeudelliset palvelualueet selkeästi asiakastilanteiden kautta",
+        purpose: "Jäsennä palvelut asiakkaan tilanteiden ja oikeudellisten teemojen kautta",
         navVisible: true,
         footerVisible: true
       },
       {
-        id: "about",
+        id: "advisor",
         pageType: "about",
-        slug: "/toimisto",
-        navigationLabel: "Toimisto",
-        title: "Toimisto",
-        purpose: "Rakenna asiantuntijaluottamusta toimintatavan ja profiilin kautta",
+        slug: "/asiantuntija",
+        navigationLabel: "Asiantuntija",
+        title: "Asiantuntija",
+        purpose: "Rakenna luottamusta profiilin, kokemuksen ja toimintatavan kautta",
         navVisible: true,
         footerVisible: true
       },
@@ -251,43 +401,43 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
         slug: "/ota-yhteytta",
         navigationLabel: "Ota yhteyttä",
         title: "Ota yhteyttä",
-        purpose: "Ohjaa rauhalliseen ja matalariskiseen ensimmäiseen yhteydenottoon",
+        purpose: "Tee ensimmäisestä yhteydenotosta turvallinen ja selkeä",
         navVisible: true,
         footerVisible: true
       }
     ]
   },
   {
-    id: "creative",
-    label: "Luova studio",
-    audience: "Brändit ja kasvuhakuiset yritykset",
-    tone: "Rohkea ja moderni",
-    heroEyebrow: "Luova studio",
+    id: "clinic",
+    label: "Klinikka ja hoitopalvelut",
+    audience: "Paikalliset ajanvarausasiakkaat",
+    tone: "Luotettava ja rauhoittava",
+    heroEyebrow: "Klinikka ja hoitopalvelut",
     heroHeadlineTemplate: (companyName) =>
-      `${companyName} tarvitsee sivun, joka näyttää yhtä vahvalta kuin sen luova osaaminen.`,
+      `${companyName} tarvitsee sivun, joka tekee palvelun, luottamuksen ja ajanvarauksen helpoksi heti.`,
     heroSubheadline:
-      "Luovan studion sivun pitää näyttää omaleimaiselta, mutta samalla tehdä palvelu ja arvolupaus välittömästi ymmärrettäviksi.",
-    serviceSectionTitle: "Palvelut ja vahvuudet näkyviksi",
+      "Sivun pitää tehdä palvelu, osaaminen ja ajanvarauksen seuraava askel välittömästi ymmärrettäviksi.",
+    serviceSectionTitle: "Palvelut ja hoidot selkeästi esiin",
     serviceItems: [
       {
-        title: "Brändi ja konsepti",
+        title: "Ydinpalvelu",
         description:
-          "Strateginen ja luova osaaminen nostetaan näkyviin heti, ei piiloteta yleisen esittelyn alle."
+          "Pääpalvelu pitää nostaa nopeasti ymmärrettäväksi."
       },
       {
-        title: "Design ja toteutus",
+        title: "Ajanvaraus",
         description:
-          "Palvelut esitetään modernilla tavalla, joka tukee premium-vaikutelmaa eikä tunnu geneeriseltä."
+          "Seuraava askel pitää olla näkyvä ja kitkaton."
       },
       {
-        title: "Referenssifiilis",
+        title: "Luottamus",
         description:
-          "Etusivu rakentaa tunnetta siitä, että studio tekee harkittua ja omaleimaista työtä."
+          "Osaaminen, toimipiste ja hoidon hyöty pitää tehdä näkyviksi."
       }
     ],
-    ctaTitle: "Aloitetaan uusi projekti",
+    ctaTitle: "Varaa aika helposti",
     ctaBody:
-      "Luovan studion sivun pitää houkutella oikeanlaisia toimeksiantoja ja tehdä yhteydenotosta luonnollinen seuraava askel.",
+      "Tämän sivun tärkein tehtävä on tehdä ajanvarauksesta mahdollisimman helppo ensimmäinen askel.",
     pageBlueprints: [
       {
         id: "home",
@@ -295,7 +445,7 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
         slug: "/",
         navigationLabel: "Etusivu",
         title: "Etusivu",
-        purpose: "Näytä luova taso ja tee arvolupaus heti kiinnostavaksi",
+        purpose: "Tee palvelu, luottamus ja ajanvaraus ymmärrettäviksi heti",
         navVisible: true,
         footerVisible: true,
         isPrimary: true
@@ -306,102 +456,27 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
         slug: "/palvelut",
         navigationLabel: "Palvelut",
         title: "Palvelut",
-        purpose: "Jäsennä strateginen ja luova tarjooma selkeiksi kokonaisuuksiksi",
+        purpose: "Jäsennä palvelut ja hoidot selkeästi",
         navVisible: true,
         footerVisible: true
       },
       {
-        id: "other",
-        pageType: "other",
-        slug: "/tyot",
-        navigationLabel: "Työt",
-        title: "Työt",
-        purpose: "Rakenna uskottavuutta referenssi- ja laatuvaikutelman kautta",
+        id: "location",
+        pageType: "about",
+        slug: "/toimipiste",
+        navigationLabel: "Toimipiste",
+        title: "Toimipiste",
+        purpose: "Rakenna luottamusta sijainnin, osaamisen ja asioinnin kautta",
         navVisible: true,
         footerVisible: true
       },
       {
-        id: "contact",
+        id: "booking",
         pageType: "contact",
-        slug: "/aloita-projekti",
-        navigationLabel: "Aloita projekti",
-        title: "Aloita projekti",
-        purpose: "Ohjaa oikeanlaiset toimeksiannot keskusteluun tai briefiin",
-        navVisible: true,
-        footerVisible: true
-      }
-    ]
-  },
-  {
-    id: "technology",
-    label: "Teknologiayritys",
-    audience: "Yrityspäättäjät ja ostotiimit",
-    tone: "Moderni ja vakuuttava",
-    heroEyebrow: "Teknologiayritys",
-    heroHeadlineTemplate: (companyName) =>
-      `${companyName} tarvitsee sivun, joka tekee tuotteesta ja arvosta ymmärrettävän nopeasti.`,
-    heroSubheadline:
-      "Teknologiayrityksen ongelma ei yleensä ole ominaisuuksien puute vaan epäselvä viestintä. Konseptin tehtävä on tehdä hyöty, uskottavuus ja seuraava askel heti näkyväksi.",
-    serviceSectionTitle: "Tarjooma ja hyöty näkyviksi",
-    serviceItems: [
-      {
-        title: "Ratkaisun ydin",
-        description:
-          "Kävijän pitää ymmärtää nopeasti mitä ongelmaa tuote ratkaisee ja kenelle se on tarkoitettu."
-      },
-      {
-        title: "Keskeiset hyödyt",
-        description:
-          "Tärkeimmät hyödyt esitetään liiketoimintakielellä, ei pelkkänä ominaisuuslistana."
-      },
-      {
-        title: "Luottamussignaalit",
-        description:
-          "Uskottavuus rakennetaan selkeällä rakenteella, referensseillä ja vahvalla CTA:lla."
-      }
-    ],
-    ctaTitle: "Ohjaa kohti demoa tai keskustelua",
-    ctaBody:
-      "B2B-teknologiasivun tärkein tehtävä on siirtää oikea kävijä kohti demoa, yhteydenottoa tai muuta seuraavaa askelta.",
-    pageBlueprints: [
-      {
-        id: "home",
-        pageType: "home",
-        slug: "/",
-        navigationLabel: "Etusivu",
-        title: "Etusivu",
-        purpose: "Tee tuotteen arvo, hyöty ja seuraava askel heti ymmärrettäväksi",
-        navVisible: true,
-        footerVisible: true,
-        isPrimary: true
-      },
-      {
-        id: "services",
-        pageType: "services",
-        slug: "/ratkaisu",
-        navigationLabel: "Ratkaisu",
-        title: "Ratkaisu",
-        purpose: "Jäsennä tuote tai palvelu ratkaisu- ja hyötynäkökulmasta",
-        navVisible: true,
-        footerVisible: true
-      },
-      {
-        id: "other",
-        pageType: "other",
-        slug: "/demo",
-        navigationLabel: "Demo",
-        title: "Demo",
-        purpose: "Ohjaa ostotiimi kohti demoa tai tarkempaa tuotearviointia",
-        navVisible: true,
-        footerVisible: true
-      },
-      {
-        id: "contact",
-        pageType: "contact",
-        slug: "/keskustelu",
-        navigationLabel: "Keskustelu",
-        title: "Keskustelu",
-        purpose: "Ohjaa liidi demoon, keskusteluun tai muuhun seuraavaan askeleeseen",
+        slug: "/varaa-aika",
+        navigationLabel: "Varaa aika",
+        title: "Varaa aika",
+        purpose: "Ohjaa kävijä suoraan ajanvaraukseen tai ensimmäiseen kontaktiin",
         navVisible: true,
         footerVisible: true
       }
@@ -409,47 +484,20 @@ export const INDUSTRY_PROFILES: IndustryProfile[] = [
   }
 ];
 
-export function resolveIndustryProfile(domain: string): IndustryProfile {
-  const normalized = domain.toLowerCase();
-
-  if (
-    normalized.includes("rakenn") ||
-    normalized.includes("remont") ||
-    normalized.includes("urak") ||
-    normalized.includes("maala")
-  ) {
-    return INDUSTRY_PROFILES.find((profile) => profile.id === "construction")!;
+export function getIndustryProfileById(industryId?: string): IndustryProfile {
+  if (!industryId) {
+    return DEFAULT_INDUSTRY_PROFILE;
   }
 
-  if (
-    normalized.includes("laki") ||
-    normalized.includes("legal") ||
-    normalized.includes("law") ||
-    normalized.includes("jurist")
-  ) {
-    return INDUSTRY_PROFILES.find((profile) => profile.id === "legal")!;
-  }
+  return (
+    INDUSTRY_PROFILES.find((profile) => profile.id === industryId) ??
+    DEFAULT_INDUSTRY_PROFILE
+  );
+}
 
-  if (
-    normalized.includes("studio") ||
-    normalized.includes("design") ||
-    normalized.includes("creative") ||
-    normalized.includes("brand")
-  ) {
-    return INDUSTRY_PROFILES.find((profile) => profile.id === "creative")!;
-  }
-
-  if (
-    normalized.includes("tech") ||
-    normalized.includes("soft") ||
-    normalized.includes("data") ||
-    normalized.includes("cloud") ||
-    normalized.includes("digital") ||
-    normalized.includes("app") ||
-    normalized.includes("io")
-  ) {
-    return INDUSTRY_PROFILES.find((profile) => profile.id === "technology")!;
-  }
-
-  return DEFAULT_INDUSTRY_PROFILE;
+export function getIndustryOptions() {
+  return INDUSTRY_PROFILES.map((profile) => ({
+    id: profile.id,
+    label: profile.label
+  }));
 }
