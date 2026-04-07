@@ -524,7 +524,7 @@ const companyBrief = await getCompanyBrief(snapshot.sourceUrl, fallbackCompanyBr
 
     const targetServices = [
       companyBrief.coreOffer.title,
-      ...companyBrief.secondaryOffers.map((offer) => offer.title)
+      ...companyBrief.secondaryOffers.map((offer: any) => offer.title)
     ];
 
     const secondaryTopics =
