@@ -456,7 +456,7 @@ const companyBrief = await getCompanyBrief(snapshot.sourceUrl, fallbackCompanyBr
 
   const archetype = getCompanyArchetype(companyBrief.archetypeId);
 
-  const sitemap: SitemapItem[] = companyBrief.recommendedPageSet.map((page) => ({
+  const sitemap: SitemapItem[] = companyBrief.recommendedPageSet.map((page: any) => ({
     pageId: page.id,
     slug: page.slug,
     pageType: page.pageType,
