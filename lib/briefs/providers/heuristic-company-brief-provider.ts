@@ -1,5 +1,5 @@
 import type { CompanyBriefProvider, BuildCompanyBriefInput } from "./company-brief-provider";
-import { inferIndustry } from "../infer-industry";
+import { inferIndustryResult } from "../infer-industry";
 import { buildCompanyBrief } from "../build-company-brief";
 
 function domainToCompanyName(domain: string): string {
@@ -21,12 +21,14 @@ export const heuristicCompanyBriefProvider: CompanyBriefProvider = {
   id: "heuristic",
   async buildBrief({ snapshot }: BuildCompanyBriefInput) {
     const companyName = snapshot.companyNameCandidate || domainToCompanyName(snapshot.domain);
-    const industry = inferIndustry(snapshot);
+    const inferred = inferIndustryResult(snapshot);
 
     return buildCompanyBrief({
       companyName,
       snapshot,
-      industry
+      industry: inferred.industry,
+      businessModel: inferred.businessModel,
+      pageArchetype: inferred.pageArchetype
     });
   }
 };
