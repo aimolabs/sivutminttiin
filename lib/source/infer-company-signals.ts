@@ -1,4 +1,4 @@
-import type { NormalizedSourceSnapshot } from "./normalize-source-snapshot";
+import type { CompanyArchetypeId } from "../mock/company-archetypes";
 
 export type PrimaryConversionGoal =
   | "quote"
@@ -40,7 +40,10 @@ export type CompanySignals = {
   pageBlueprintVariant: PageBlueprintVariant;
   likelyPrimaryService: string | null;
   likelySecondaryServices: string[];
+  companyArchetypeId?: CompanyArchetypeId;
 };
+
+import type { NormalizedSourceSnapshot } from "./normalize-source-snapshot";
 
 function includesAny(text: string, keywords: string[]): boolean {
   return keywords.some((keyword) => text.includes(keyword));
