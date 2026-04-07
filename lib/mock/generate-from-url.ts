@@ -1,4 +1,3 @@
-import { generateCompanyBriefFromUrl } from "@/lib/ai/generate-company-brief";
 import type {
   AssetSlot,
   CTA,
@@ -442,7 +441,7 @@ export async function buildProjectFromSourceSnapshot(
   const briefProvider = getCompanyBriefProvider();
 
   const fallbackCompanyBrief = await briefProvider.buildBrief({ snapshot });
-const companyBrief = await getCompanyBrief(snapshot.sourceUrl, fallbackCompanyBrief);
+const companyBrief = fallbackCompanyBrief;
 
   if (options?.industryId) {
     companyBrief.inferredIndustryId = options.industryId;
@@ -611,16 +610,3 @@ export async function generateProjectFromUrl(
   return buildProjectFromSourceSnapshot(snapshot, options);
 }
 
-// --- AI BRIEF OVERRIDE (temporary) ---
-async function getCompanyBrief(url: string, fallback: any) {
-  try {
-    const ai = await generateCompanyBriefFromUrl(url);
-    if (ai) {
-      console.log("AI brief used");
-      return ai;
-    }
-  } catch (e) {
-    console.error("AI failed, fallback used");
-  }
-  return fallback;
-}
