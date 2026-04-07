@@ -32,7 +32,7 @@ export function ProjectPreview({ project }: Props) {
     <section className="space-y-6">
       <div className="space-y-3">
         <p className="text-sm font-medium uppercase tracking-[0.18em] text-neutral-500">
-          Multi-page preview
+          Client-facing preview
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -57,40 +57,40 @@ export function ProjectPreview({ project }: Props) {
         </div>
       </div>
 
-      <div className="rounded-[2rem] border border-neutral-200 bg-neutral-50 p-5 md:p-6">
-        <div className="space-y-4 rounded-[1.5rem] border border-neutral-200 bg-white p-5">
-          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-neutral-200 pb-4">
-            <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
-                {activePage.pageType}
-              </p>
-              <h2 className="text-2xl font-semibold text-neutral-950">
-                {activePage.title}
-              </h2>
-              <p className="text-sm text-neutral-600">{activePage.purpose}</p>
-            </div>
-
-            <div className="min-w-[220px] rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm">
-              <p className="font-medium text-neutral-900">SEO snapshot</p>
-              <div className="mt-3 space-y-2 text-neutral-600">
-                <p>
-                  <span className="font-medium text-neutral-900">Slug:</span>{" "}
-                  {activePage.slug}
-                </p>
-                <p>
-                  <span className="font-medium text-neutral-900">Title:</span>{" "}
-                  {activePage.pageSEO.title}
-                </p>
-                <p>
-                  <span className="font-medium text-neutral-900">H1:</span>{" "}
-                  {activePage.pageSEO.h1}
-                </p>
-              </div>
-            </div>
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
+              {activePage.pageType}
+            </p>
+            <h2 className="text-2xl font-semibold text-neutral-950">
+              {activePage.title}
+            </h2>
+            <p className="max-w-2xl text-sm text-neutral-600">
+              {activePage.purpose}
+            </p>
           </div>
 
-          <PreviewSectionRenderer project={project} pageId={activePage.pageId} />
+          <div className="min-w-[260px] rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-sm">
+            <p className="font-medium text-neutral-900">SEO snapshot</p>
+            <div className="mt-3 space-y-2 text-neutral-600">
+              <p>
+                <span className="font-medium text-neutral-900">Slug:</span>{" "}
+                {activePage.slug}
+              </p>
+              <p>
+                <span className="font-medium text-neutral-900">Title:</span>{" "}
+                {activePage.pageSEO.title}
+              </p>
+              <p>
+                <span className="font-medium text-neutral-900">H1:</span>{" "}
+                {activePage.pageSEO.h1}
+              </p>
+            </div>
+          </div>
         </div>
+
+        <PreviewSectionRenderer project={project} pageId={activePage.pageId} />
       </div>
     </section>
   );
