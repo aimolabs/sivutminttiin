@@ -1,8 +1,11 @@
 import { SiteHeader } from "@/components/layout/site-header";
 import { ProjectListClient } from "@/components/projects/project-list-client";
 import { mockProjects } from "@/lib/mock/projects";
+import { mapProjectToListItem } from "@/lib/projects/project-list-items";
 
 export default function ProjectsPage() {
+  const baseItems = mockProjects.map(mapProjectToListItem);
+
   return (
     <main className="min-h-screen">
       <SiteHeader />
@@ -16,13 +19,12 @@ export default function ProjectsPage() {
             Projektit
           </h1>
           <p className="max-w-2xl text-sm leading-6 text-white/65 md:text-base">
-            Tämä näkymä näyttää kaikki redesign-projektit samassa rakenteessa kuin
-            etusivun dashboard. Järjestys, tila ja yrityskohtainen konteksti pitää
-            olla nopeasti hahmotettavissa.
+            Tämä näkymä näyttää seed-projektit ja tässä selaimessa luodut generated previewt
+            yhtenäisessä listassa.
           </p>
         </section>
 
-        <ProjectListClient projects={mockProjects} />
+        <ProjectListClient baseItems={baseItems} />
       </div>
     </main>
   );

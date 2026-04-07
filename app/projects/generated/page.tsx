@@ -2,6 +2,8 @@ import { generateProjectFromUrl } from "@/lib/mock/generate-from-url";
 import { PreviewSectionRenderer } from "@/components/projects/preview-section-renderer";
 import { CompanyBriefDebug } from "@/components/projects/company-brief-debug";
 import { GenerateProjectForm } from "@/components/projects/generate-project-form";
+import { SaveGeneratedProjectClient } from "@/components/projects/save-generated-project-client";
+import type { ProjectListItem } from "@/lib/projects/project-list-items";
 
 type SearchParams = Promise<{
   url?: string;
@@ -30,7 +32,7 @@ export default async function GeneratedPage({ searchParams }: Props) {
             Luo uusi redesign-projekti
           </h1>
           <p className="max-w-2xl text-neutral-600">
-            Valitse URL, industry ja style preset. Industry on nyt controlled input,
+            Valitse URL, industry ja style preset. Industry on controlled input,
             ei automaattisen arvauksen varassa.
           </p>
         </div>
@@ -54,8 +56,21 @@ export default async function GeneratedPage({ searchParams }: Props) {
     project.pages[0]?.pageId ??
     "";
 
+  const listItem: ProjectListItem = {
+    id: `generated:${project.siteProfile.companyName}:${project.createdAt}`,
+    companyName: project.siteProfile.companyName,
+    industryLabel: project.siteProfile.industry,
+    businessSummary: project.businessSummary,
+    createdAt: project.createdAt,
+    status: project.status,
+    href: `/projects/generated?url=${encodeURIComponent(url)}&industryId=${encodeURIComponent(industryId)}&stylePreset=${encodeURIComponent(stylePreset)}`,
+    source: "generated"
+  };
+
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-6 py-10">
+      <SaveGeneratedProjectClient item={listItem} />
+
       <div className="space-y-2">
         <p className="text-sm font-medium uppercase tracking-[0.18em] text-neutral-500">
           Generated preview

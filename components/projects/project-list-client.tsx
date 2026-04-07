@@ -1,41 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import type { Project } from "@/lib/mock/projects";
+import { useEffect, useMemo, useState } from "react";
+import type { ProjectListItem } from "@/lib/projects/project-list-items";
+import { readRecentGeneratedProjects } from "@/lib/projects/recent-generated-storage";
 
 type SortOption = "date-desc" | "date-asc" | "name-asc" | "name-desc";
 
 type Props = {
-  projects: Project[];
+  baseItems: ProjectListItem[];
 };
 
-function sortProjects(projects: Project[], sort: SortOption): Project[] {
-  const items = [...projects];
+function sortItems(items: ProjectListItem[], sort: SortOption): ProjectListItem[] {
+  const next = [...items];
 
   switch (sort) {
     case "date-asc":
-      return items.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      return next.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     case "name-asc":
-      return items.sort((a, b) =>
-        a.siteProfile.companyName.localeCompare(b.siteProfile.companyName, "fi")
-      );
+      return next.sort((a, b) => a.companyName.localeCompare(b.companyName, "fi"));
     case "name-desc":
-      return items.sort((a, b) =>
-        b.siteProfile.companyName.localeCompare(a.siteProfile.companyName, "fi")
-      );
+      return next.sort((a, b) => b.companyName.localeCompare(a.companyName, "fi"));
     case "date-desc":
     default:
-      return items.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      return next.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 }
 
-export function ProjectListClient({ projects }: Props) {
-  const [sort, setSort] = useState<SortOption>("date-desc");
+function mergeItems(
+  baseItems: ProjectListItem[],
+  recentItems: ProjectListItem[]
+): ProjectListItem[] {
+  const map = new Map<string, ProjectListItem>();
 
-  const sortedProjects = useMemo(() => {
-    return sortProjects(projects, sort);
-  }, [projects, sort]);
+  for (const item of [...recentItems, ...baseItems]) {
+    const key = `${item.source}:${item.id}:${item.href}`;
+    if (!map.has(key)) {
+      map.set(key, item);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+export function ProjectListClient({ baseItems }: Props) {
+  const [sort, setSort] = useState<SortOption>("date-desc");
+  const [recentItems, setRecentItems] = useState<ProjectListItem[]>([]);
+
+  useEffect(() => {
+    setRecentItems(readRecentGeneratedProjects());
+  }, []);
+
+  const items = useMemo(() => {
+    return sortItems(mergeItems(baseItems, recentItems), sort);
+  }, [baseItems, recentItems, sort]);
 
   return (
     <section className="space-y-5">
@@ -48,7 +66,7 @@ export function ProjectListClient({ projects }: Props) {
             Olemassa olevat projektit
           </h2>
           <p className="text-sm text-white/60">
-            Projektit toimivat redesign-engine workflow’n lähtöpisteinä ja jatkuvana työjonona.
+            Listassa näkyvät seed-projektit ja tässä selaimessa luodut uudet generated previewt.
           </p>
         </div>
 
@@ -65,45 +83,50 @@ export function ProjectListClient({ projects }: Props) {
             onChange={(event) => setSort(event.target.value as SortOption)}
             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
           >
-            <option value="date-desc">Uusin ensin</option>
-            <option value="date-asc">Vanhin ensin</option>
-            <option value="name-asc">A–Ö</option>
-            <option value="name-desc">Ö–A</option>
+            <option value="date-desc" className="text-black">Uusin ensin</option>
+            <option value="date-asc" className="text-black">Vanhin ensin</option>
+            <option value="name-asc" className="text-black">A–Ö</option>
+            <option value="name-desc" className="text-black">Ö–A</option>
           </select>
         </div>
       </div>
 
-      {sortedProjects.length === 0 ? (
+      {items.length === 0 ? (
         <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 text-sm text-white/70">
           Ei vielä projekteja.
         </div>
       ) : (
         <div className="grid gap-4">
-          {sortedProjects.map((project) => (
+          {items.map((item) => (
             <Link
-              key={project.id}
-              href={`/projects/${project.id}`}
+              key={`${item.source}:${item.id}:${item.href}`}
+              href={item.href}
               className="block rounded-[1.75rem] border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
             >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-xl font-semibold text-white md:text-2xl">
-                      {project.siteProfile.companyName}
+                      {item.companyName}
                     </h3>
+
                     <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.16em] text-white/60">
-                      {project.siteProfile.industry}
+                      {item.industryLabel}
+                    </span>
+
+                    <span className="rounded-full border border-white/10 bg-black/10 px-3 py-1 text-xs uppercase tracking-[0.16em] text-white/45">
+                      {item.source === "generated" ? "Generated" : "Seed"}
                     </span>
                   </div>
 
                   <p className="max-w-3xl text-sm leading-6 text-white/70">
-                    {project.businessSummary}
+                    {item.businessSummary}
                   </p>
                 </div>
 
                 <div className="shrink-0 space-y-2 text-sm text-white/55 md:text-right">
-                  <p>{project.createdAt}</p>
-                  <p>{project.status === "ready" ? "Ready" : "Draft"}</p>
+                  <p>{item.createdAt}</p>
+                  <p>{item.status === "ready" ? "Ready" : "Draft"}</p>
                 </div>
               </div>
             </Link>
