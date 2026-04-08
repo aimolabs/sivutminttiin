@@ -1,16 +1,44 @@
+export type RedesignBriefPage = {
+  sourceUrl: string;
+  pageRole: "home" | "services" | "about" | "contact" | "other";
+  pageTitle: string;
+  metaDescription: string;
+  h1: string;
+  h2s: string[];
+  navItems: string[];
+  ctas: string[];
+  summary: string;
+  keepSignals: string[];
+  improveSignals: string[];
+  imageUrls: string[];
+};
+
 export type RedesignBrief = {
-  source: {
-    url: string;
-    domain: string;
+  site: {
     companyName: string;
+    domain: string;
+    primaryUrl: string;
+    additionalUrls: string[];
+    allUrls: string[];
   };
 
   brand: {
     siteName?: string;
     logoUrl?: string;
-    iconUrl?: string;
+    faviconUrl?: string;
     themeColor?: string;
-    imageUrls: string[];
+    secondaryColors: string[];
+  };
+
+  assets: {
+    heroImageCandidates: string[];
+    logoCandidates: string[];
+    galleryImages: string[];
+    pageImages: Array<{
+      url: string;
+      sourceUrl: string;
+      purposeHint?: string;
+    }>;
   };
 
   business: {
@@ -19,29 +47,17 @@ export type RedesignBrief = {
     coreOffer?: string;
     secondaryOffers: string[];
     locations: string[];
+    trustSignals: string[];
+    primaryCTA?: string;
   };
 
-  content: {
-    headings: string[];
-    navItems: string[];
-    ctas: string[];
-    summary: string;
-  };
-
-  analysis: {
-    strengths: string[];
-    weaknesses: string[];
-  };
+  pages: RedesignBriefPage[];
 
   redesign: {
-    heroAngle: string;
-    primaryCTA: string;
-    sections: Array<{
-      id: string;
-      purpose: string;
-      direction: string;
-    }>;
-    keep: string[];
-    improve: string[];
+    globalDirection: string;
+    homepageGoal: string;
+    recommendedPages: string[];
+    visualDirection: string;
+    notesForAI: string[];
   };
 };

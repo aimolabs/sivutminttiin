@@ -1,31 +1,49 @@
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/layout/site-header";
-import { generateBriefFromUrl } from "@/lib/briefs/generate-brief-from-url";
+import { generateBriefFromUrls } from "@/lib/briefs/generate-brief-from-urls";
 import { mapBriefToListItem } from "@/lib/briefs/brief-list-items";
 import { BriefCopyButton } from "@/components/briefs/brief-copy-button";
 import { SaveGeneratedBriefClient } from "@/components/briefs/save-generated-brief-client";
 import { GenerateProjectForm } from "@/components/projects/generate-project-form";
 
 type SearchParams = Promise<{
-  url?: string;
+  primaryUrl?: string;
+  additionalUrl?: string | string[];
 }>;
 
 type Props = {
   searchParams: SearchParams;
 };
 
+function normalizeAdditionalUrls(value: string | string[] | undefined): string[] {
+  if (!value) return [];
+  return (Array.isArray(value) ? value : [value])
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 14);
+}
+
 export default async function GeneratedBriefPage({ searchParams }: Props) {
   const params = await searchParams;
-  const url = params.url?.trim() ?? "";
+  const primaryUrl = params.primaryUrl?.trim() ?? "";
+  const additionalUrls = normalizeAdditionalUrls(params.additionalUrl);
 
-  if (!url) {
+  if (!primaryUrl) {
     notFound();
   }
 
-  const brief = await generateBriefFromUrl(url);
+  const brief = await generateBriefFromUrls({
+    primaryUrl,
+    additionalUrls
+  });
+
   const briefText = JSON.stringify(brief, null, 2);
 
-  const href = `/briefs/generated?url=${encodeURIComponent(url)}`;
+  const hrefParams = new URLSearchParams();
+  hrefParams.set("primaryUrl", primaryUrl);
+  additionalUrls.forEach((url) => hrefParams.append("additionalUrl", url));
+
+  const href = `/briefs/generated?${hrefParams.toString()}`;
   const listItem = mapBriefToListItem(brief, href);
 
   return (
@@ -40,11 +58,11 @@ export default async function GeneratedBriefPage({ searchParams }: Props) {
             Structured redesign brief
           </p>
           <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
-            {brief.source.companyName}
+            {brief.site.companyName}
           </h1>
           <p className="max-w-3xl text-sm leading-6 text-white/65 md:text-base">
-            Tämä on rakenteinen brief, jonka voit kopioida suoraan ChatGPT:lle tai Claudeen uuden
-            etusivun rakentamista varten.
+            Tämä brief yhdistää pää-URL:n ja lisä-URLit yhdeksi rakenteiseksi syötteeksi,
+            jonka voit kopioida suoraan ChatGPT:lle tai Claudeen uuden sivuston rakentamista varten.
           </p>
         </section>
 
@@ -70,20 +88,27 @@ export default async function GeneratedBriefPage({ searchParams }: Props) {
               <div className="mt-4 space-y-3 text-sm leading-6 text-white/75">
                 <p>
                   <span className="font-semibold text-white">Domain:</span>{" "}
-                  {brief.source.domain}
+                  {brief.site.domain}
                 </p>
                 <p>
-                  <span className="font-semibold text-white">Hero angle:</span>{" "}
-                  {brief.redesign.heroAngle}
+                  <span className="font-semibold text-white">Primary URL:</span>{" "}
+                  {brief.site.primaryUrl}
                 </p>
                 <p>
-                  <span className="font-semibold text-white">Primary CTA:</span>{" "}
-                  {brief.redesign.primaryCTA}
+                  <span className="font-semibold text-white">Additional URLs:</span>{" "}
+                  {brief.site.additionalUrls.length}
+                </p>
+                <p>
+                  <span className="font-semibold text-white">Core offer:</span>{" "}
+                  {brief.business.coreOffer || "-"}
                 </p>
               </div>
             </div>
 
-            <GenerateProjectForm defaultUrl={url} />
+            <GenerateProjectForm
+              defaultPrimaryUrl={primaryUrl}
+              defaultAdditionalUrls={additionalUrls}
+            />
           </div>
         </section>
       </div>

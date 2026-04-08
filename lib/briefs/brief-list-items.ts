@@ -15,14 +15,14 @@ export function mapBriefToListItem(
   href: string
 ): BriefListItem {
   return {
-    id: `${brief.source.domain}:${brief.source.url}`,
-    companyName: brief.source.companyName,
-    domain: brief.source.domain,
+    id: `${brief.site.domain}:${brief.site.primaryUrl}`,
+    companyName: brief.site.companyName,
+    domain: brief.site.domain,
     createdAt: new Date().toISOString(),
     href,
     summary:
-      brief.content.summary ||
-      brief.redesign.heroAngle ||
+      brief.business.coreOffer ||
+      brief.redesign.homepageGoal ||
       "Structured redesign brief",
     briefText: JSON.stringify(brief, null, 2)
   };

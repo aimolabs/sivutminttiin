@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 type SearchParams = Promise<{
   url?: string;
+  primaryUrl?: string;
 }>;
 
 type Props = {
@@ -10,10 +11,10 @@ type Props = {
 
 export default async function LegacyGeneratedProjectPage({ searchParams }: Props) {
   const params = await searchParams;
-  const url = params.url?.trim();
+  const primaryUrl = params.primaryUrl?.trim() || params.url?.trim();
 
-  if (url) {
-    redirect(`/briefs/generated?url=${encodeURIComponent(url)}`);
+  if (primaryUrl) {
+    redirect(`/briefs/generated?primaryUrl=${encodeURIComponent(primaryUrl)}`);
   }
 
   redirect("/");
