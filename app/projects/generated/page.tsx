@@ -32,14 +32,11 @@ export default async function GeneratedPage({ searchParams }: Props) {
             Luo uusi redesign-projekti
           </h1>
           <p className="max-w-2xl text-neutral-600">
-            Valitse URL, industry ja style preset. Industry on controlled input,
-            ei automaattisen arvauksen varassa.
+            Syötä URL. Tämä näkymä on vanhaa preview-flowta varten.
           </p>
         </div>
 
-        <GenerateProjectForm
-          defaultUrl=""
-        />
+        <GenerateProjectForm defaultUrl="" />
       </div>
     );
   }
@@ -122,15 +119,11 @@ export default async function GeneratedPage({ searchParams }: Props) {
               Regenerate
             </p>
             <h3 className="text-2xl font-semibold tracking-tight">
-              Vaihda inputteja ja generoi uudestaan
+              Syötä toinen URL
             </h3>
           </div>
 
-          <GenerateProjectForm
-            defaultUrl={url}
-            defaultIndustryId={industryId}
-            defaultStylePreset={stylePreset}
-          />
+          <GenerateProjectForm defaultUrl={url} />
         </div>
 
         <div className="space-y-4">
