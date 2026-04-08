@@ -18,6 +18,7 @@ export type NormalizedSourceSnapshot = {
   themeColor: string;
   ogImageUrl: string;
   iconUrl: string;
+  imageUrls: string[];
 };
 
 const GENERIC_HEADINGS = /^(etusivu|home|palvelut|services|yhteystiedot|contact|meistä|about|blogi|blog|faq)$/i;
@@ -136,6 +137,10 @@ function filterH2s(values: string[]): string[] {
 function normalizeBodyText(value: string): string {
   const cleaned = sanitizeText(value);
   return cleaned.slice(0, 1400);
+}
+
+function normalizeImageUrls(values: string[]): string[] {
+  return unique(values.map(sanitizeUrl).filter(Boolean)).slice(0, 24);
 }
 
 function domainToCompanyName(domain: string): string {
@@ -257,6 +262,7 @@ export function normalizeSourceSnapshot(
   const themeColor = sanitizeText(snapshot.themeColor);
   const ogImageUrl = sanitizeUrl(snapshot.ogImageUrl);
   const iconUrl = sanitizeUrl(snapshot.iconUrl);
+  const imageUrls = normalizeImageUrls(snapshot.imageUrls);
 
   const companyNameCandidate = resolveCompanyNameCandidate({
     domain: snapshot.domain,
@@ -302,6 +308,7 @@ export function normalizeSourceSnapshot(
     siteName,
     themeColor,
     ogImageUrl,
-    iconUrl
+    iconUrl,
+    imageUrls
   };
 }

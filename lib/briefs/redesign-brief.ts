@@ -1,3 +1,12 @@
+export type RedesignBriefImage = {
+  id: string;
+  url: string;
+  sourceUrl: string;
+  label?: string;
+  kind?: "logo" | "hero" | "gallery" | "service" | "other";
+  selected: boolean;
+};
+
 export type RedesignBriefPage = {
   sourceUrl: string;
   pageRole: "home" | "services" | "about" | "contact" | "other";
@@ -39,6 +48,7 @@ export type RedesignBrief = {
       sourceUrl: string;
       purposeHint?: string;
     }>;
+    detectedImages: RedesignBriefImage[];
   };
 
   business: {

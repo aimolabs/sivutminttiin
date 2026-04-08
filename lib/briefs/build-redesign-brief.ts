@@ -2,7 +2,7 @@ import type { SourceSnapshot } from "../source/source-snapshot";
 import { normalizeSourceSnapshot } from "../source/normalize-source-snapshot";
 import { analyzeSourceSnapshot } from "../source/analyze-source-snapshot";
 import { inferCompanySignals } from "../source/infer-company-signals";
-import type { RedesignBrief, RedesignBriefPage } from "./redesign-brief";
+import type { RedesignBrief, RedesignBriefPage, RedesignBriefImage } from "./redesign-brief";
 
 type BuildRedesignBriefInput = {
   primaryUrl: string;
@@ -16,6 +16,19 @@ function unique<T>(values: T[]): T[] {
 
 function compact(values: Array<string | undefined | null>): string[] {
   return values.map((value) => (value ?? "").trim()).filter(Boolean);
+}
+
+function uniqueByUrl<T extends { url: string }>(values: T[]): T[] {
+  const seen = new Set<string>();
+  const result: T[] = [];
+
+  for (const value of values) {
+    if (seen.has(value.url)) continue;
+    seen.add(value.url);
+    result.push(value);
+  }
+
+  return result;
 }
 
 function detectPageRole(input: {
@@ -79,6 +92,53 @@ function pickRecommendedPages(pages: RedesignBriefPage[]): string[] {
   return unique(recommended).slice(0, 6);
 }
 
+function buildDetectedImages(
+  normalized: ReturnType<typeof normalizeSourceSnapshot>[],
+  primaryUrl: string
+): RedesignBriefImage[] {
+  const items: RedesignBriefImage[] = [];
+
+  for (const snapshot of normalized) {
+    if (snapshot.ogImageUrl) {
+      items.push({
+        id: `img-${items.length + 1}`,
+        url: snapshot.ogImageUrl,
+        sourceUrl: snapshot.sourceUrl,
+        label: snapshot.sourceUrl === primaryUrl ? "Primary page OG image" : "Page OG image",
+        kind: snapshot.sourceUrl === primaryUrl ? "hero" : "gallery",
+        selected: snapshot.sourceUrl === primaryUrl
+      });
+    }
+
+    for (const imageUrl of snapshot.imageUrls.slice(0, 8)) {
+      items.push({
+        id: `img-${items.length + 1}`,
+        url: imageUrl,
+        sourceUrl: snapshot.sourceUrl,
+        label: snapshot.sourceUrl === primaryUrl ? "Primary page image" : "Detected page image",
+        kind: snapshot.sourceUrl === primaryUrl ? "gallery" : "other",
+        selected: false
+      });
+    }
+
+    if (snapshot.iconUrl) {
+      items.push({
+        id: `img-${items.length + 1}`,
+        url: snapshot.iconUrl,
+        sourceUrl: snapshot.sourceUrl,
+        label: "Favicon / icon",
+        kind: "logo",
+        selected: snapshot.sourceUrl === primaryUrl
+      });
+    }
+  }
+
+  return uniqueByUrl(items).slice(0, 60).map((item, index) => ({
+    ...item,
+    id: `img-${index + 1}`
+  }));
+}
+
 export function buildRedesignBrief({
   primaryUrl,
   additionalUrls,
@@ -122,7 +182,9 @@ export function buildRedesignBrief({
         ...snapshot.h2s.slice(0, 2)
       ].filter(Boolean),
       improveSignals: analysis.auditIssues.map((issue) => issue.title),
-      imageUrls: compact([snapshot.ogImageUrl])
+      imageUrls: unique(
+        compact([snapshot.ogImageUrl, ...snapshot.imageUrls])
+      ).slice(0, 12)
     };
   });
 
@@ -143,22 +205,28 @@ export function buildRedesignBrief({
   );
 
   const heroImageCandidates = unique(
-    compact(normalized.map((snapshot) => snapshot.ogImageUrl))
+    compact([
+      primary.ogImageUrl,
+      ...primary.imageUrls.slice(0, 6),
+      ...normalized.flatMap((snapshot) => compact([snapshot.ogImageUrl]))
+    ])
   );
 
   const logoCandidates = unique(
-    compact(normalized.map((snapshot) => snapshot.iconUrl))
+    compact([primary.iconUrl, ...normalized.map((snapshot) => snapshot.iconUrl)])
   );
 
-  const pageImages = unique(
+  const pageImages = uniqueByUrl(
     normalized.flatMap((snapshot) =>
-      compact([snapshot.ogImageUrl]).map((url) => ({
+      unique(compact([snapshot.ogImageUrl, ...snapshot.imageUrls])).map((url) => ({
         url,
         sourceUrl: snapshot.sourceUrl,
         purposeHint: snapshot.sourceUrl === primaryUrl ? "primary-page-image" : "page-image"
       }))
     )
-  ).filter(Boolean) as RedesignBrief["assets"]["pageImages"];
+  ).slice(0, 60);
+
+  const detectedImages = buildDetectedImages(normalized, primaryUrl);
 
   const allWeaknesses = unique(
     analyses.flatMap((analysis) => analysis.auditIssues.map((issue) => issue.title))
@@ -191,7 +259,8 @@ export function buildRedesignBrief({
       heroImageCandidates,
       logoCandidates,
       galleryImages: heroImageCandidates.slice(1),
-      pageImages
+      pageImages,
+      detectedImages
     },
 
     business: {
@@ -217,6 +286,7 @@ export function buildRedesignBrief({
       notesForAI: [
         `Primary URL toimii etusivun lähteenä: ${primaryUrl}`,
         "Säilytä liiketoiminnan todellinen sisältö, älä keksi uusia palveluita ilman signaaleja.",
+        "Käytä vain selected=true merkittyjä kuvia, logoja ja assetteja generation pohjana.",
         "Korjaa erityisesti nämä ongelmat:",
         ...allWeaknesses.slice(0, 6),
         "Hyödynnä näitä vahvuuksia ja säilytettäviä signaaleja:",

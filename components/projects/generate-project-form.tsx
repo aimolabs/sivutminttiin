@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -8,12 +8,16 @@ type Props = {
   defaultAdditionalUrls?: string[];
 };
 
-function parseAdditionalUrls(input: string): string[] {
-  return input
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 14);
+const MAX_ADDITIONAL_URLS = 14;
+
+function buildInitialAdditionalUrls(defaultAdditionalUrls: string[]): string[] {
+  const values = [...defaultAdditionalUrls.slice(0, MAX_ADDITIONAL_URLS)];
+
+  while (values.length < MAX_ADDITIONAL_URLS) {
+    values.push("");
+  }
+
+  return values;
 }
 
 export function GenerateProjectForm({
@@ -22,26 +26,33 @@ export function GenerateProjectForm({
 }: Props) {
   const router = useRouter();
   const [primaryUrl, setPrimaryUrl] = useState(defaultPrimaryUrl);
-  const [additionalUrlsText, setAdditionalUrlsText] = useState(
-    defaultAdditionalUrls.join("\n")
+  const [additionalUrls, setAdditionalUrls] = useState(
+    buildInitialAdditionalUrls(defaultAdditionalUrls)
   );
+
+  const filledAdditionalUrls = useMemo(
+    () => additionalUrls.map((url) => url.trim()).filter(Boolean).slice(0, MAX_ADDITIONAL_URLS),
+    [additionalUrls]
+  );
+
+  function updateAdditionalUrl(index: number, value: string) {
+    setAdditionalUrls((current) =>
+      current.map((item, itemIndex) => (itemIndex === index ? value : item))
+    );
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const additionalUrls = parseAdditionalUrls(additionalUrlsText);
-
     const params = new URLSearchParams();
     params.set("primaryUrl", primaryUrl);
 
-    additionalUrls.forEach((url) => {
+    filledAdditionalUrls.forEach((url) => {
       params.append("additionalUrl", url);
     });
 
     router.push(`/briefs/generated?${params.toString()}`);
   }
-
-  const additionalCount = parseAdditionalUrls(additionalUrlsText).length;
 
   return (
     <form
@@ -56,8 +67,8 @@ export function GenerateProjectForm({
           Luo redesign brief koko sivuston pohjalta
         </h2>
         <p className="max-w-2xl text-sm leading-6 text-white/65 md:text-base">
-          Syötä ensin pää-URL ja sen jälkeen halutessasi enintään 14 lisä-URLia, yksi per rivi.
-          Työkalu kokoaa niistä yhden rakenteisen briefin tekoälyä varten.
+          Syötä pää-URL ja halutessasi enintään 14 lisä-URLia omiin kenttiinsä.
+          Työkalu yhdistää ne yhdeksi rakenteiseksi briefiksi.
         </p>
       </div>
 
@@ -76,28 +87,45 @@ export function GenerateProjectForm({
         />
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="additionalUrls" className="text-sm font-medium text-white/85">
-          Lisä-URLit (max 14, yksi per rivi)
-        </label>
-        <textarea
-          id="additionalUrls"
-          value={additionalUrlsText}
-          onChange={(event) => setAdditionalUrlsText(event.target.value)}
-          placeholder={
-            "https://example.com/palvelut\nhttps://example.com/meista\nhttps://example.com/yhteystiedot"
-          }
-          rows={8}
-          className="w-full rounded-xl border border-white/10 bg-black/10 px-4 py-4 text-sm text-white outline-none placeholder:text-white/30"
-        />
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-white/85">
+            Lisä-URLit
+          </p>
+          <p className="text-xs text-white/45">
+            Täytä vain ne kentät joita haluat käyttää. Maksimi 14 lisä-URLia.
+          </p>
+        </div>
+
+        <div className="grid gap-3">
+          {additionalUrls.map((value, index) => (
+            <div key={index} className="space-y-1">
+              <label
+                htmlFor={`additionalUrl-${index}`}
+                className="text-xs uppercase tracking-[0.14em] text-white/35"
+              >
+                Lisä-URL {index + 1}
+              </label>
+              <input
+                id={`additionalUrl-${index}`}
+                type="url"
+                value={value}
+                onChange={(event) => updateAdditionalUrl(index, event.target.value)}
+                placeholder={`https://example.com/page-${index + 1}`}
+                className="w-full rounded-xl border border-white/10 bg-black/10 px-4 py-3 text-sm text-white outline-none placeholder:text-white/30"
+              />
+            </div>
+          ))}
+        </div>
+
         <p className="text-xs text-white/40">
-          Lisä-URLeja mukana: {additionalCount}/14
+          Täytettyjä lisä-URLeja: {filledAdditionalUrls.length}/{MAX_ADDITIONAL_URLS}
         </p>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-xs uppercase tracking-[0.18em] text-white/40">
-          URLs → Source capture → Structured site brief
+          URLs → Source capture → Image selection → Structured site brief
         </p>
 
         <button

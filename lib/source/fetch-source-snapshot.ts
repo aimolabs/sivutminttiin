@@ -96,6 +96,26 @@ function extractAll(html: string, regex: RegExp, maxItems = 8): string[] {
   return results;
 }
 
+function extractImageUrls(html: string, baseUrl: string, maxItems = 24): string[] {
+  const results: string[] = [];
+  const regex = /<img[^>]+src=["']([\s\S]*?)["'][^>]*>/gi;
+
+  for (const match of html.matchAll(regex)) {
+    const raw = cleanText(match[1] || "");
+    if (!raw) continue;
+    if (raw.startsWith("data:")) continue;
+
+    const absolute = toAbsoluteUrl(baseUrl, raw);
+    if (!absolute) continue;
+    if (results.includes(absolute)) continue;
+
+    results.push(absolute);
+    if (results.length >= maxItems) break;
+  }
+
+  return results;
+}
+
 function stripHtmlToText(html: string): string {
   return cleanText(
     html
@@ -138,7 +158,8 @@ function fallbackSnapshot(url: string): SourceSnapshot {
     siteName: "",
     themeColor: "",
     ogImageUrl: "",
-    iconUrl: ""
+    iconUrl: "",
+    imageUrls: []
   };
 }
 
@@ -190,6 +211,8 @@ export async function fetchSourceSnapshot(url: string): Promise<SourceSnapshot> 
     const iconUrl =
       extractLinkHref(html, ["icon", "shortcut icon", "apple-touch-icon"], url) || "";
 
+    const imageUrls = extractImageUrls(html, url, 24);
+
     return {
       sourceUrl: url,
       domain,
@@ -204,7 +227,8 @@ export async function fetchSourceSnapshot(url: string): Promise<SourceSnapshot> 
       siteName,
       themeColor,
       ogImageUrl,
-      iconUrl
+      iconUrl,
+      imageUrls
     };
   } catch {
     return fallbackSnapshot(url);

@@ -13,4 +13,5 @@ export type SourceSnapshot = {
   themeColor: string;
   ogImageUrl: string;
   iconUrl: string;
+  imageUrls: string[];
 };
