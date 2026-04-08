@@ -1,12 +1,8 @@
 import { SiteHeader } from "@/components/layout/site-header";
 import { GenerateProjectForm } from "@/components/projects/generate-project-form";
-import { ProjectListClient } from "@/components/projects/project-list-client";
-import { mockProjects } from "@/lib/mock/projects";
-import { mapProjectToListItem } from "@/lib/projects/project-list-items";
+import { BriefListClient } from "@/components/briefs/brief-list-client";
 
 export default function HomePage() {
-  const baseItems = mockProjects.map(mapProjectToListItem);
-
   return (
     <main className="min-h-screen">
       <SiteHeader />
@@ -18,7 +14,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <ProjectListClient baseItems={baseItems} />
+        <BriefListClient />
       </div>
     </main>
   );
