@@ -19,6 +19,22 @@ function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
+function uniqueCaseInsensitive(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const value of values) {
+    const trimmed = value.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(trimmed);
+  }
+
+  return result;
+}
+
 function compact(values: Array<string | undefined | null>): string[] {
   return values.map((value) => (value ?? "").trim()).filter(Boolean);
 }
@@ -36,19 +52,32 @@ function uniqueByUrl<T extends { url: string }>(values: T[]): T[] {
   return result;
 }
 
+function stripRepeatedBoilerplate(text: string): string {
+  return text
+    .replace(/Meilt[äa].{0,120}?Paras rengastarjous/gi, " ")
+    .replace(/Autokorjaamo\s+Autohuollot\s+Jarruty[öo][t]?[\s\S]{0,220}?Alumiinivanteet/gi, " ")
+    .replace(/Yhteystiedot\s+Konala[\s\S]{0,180}?Puh\.\s*09\s*5483838/gi, " ")
+    .replace(/Klaukkala[\s\S]{0,120}?Puh\.\s*040\s*8322398/gi, " ")
+    .replace(/Sijaisauto[\s\S]{0,120}?Kävijälaskuri[\s\S]{0,80}?kpl/gi, " ")
+    .replace(/©\s*2013/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function pickContentBlocks(
   bodyText: string,
   paragraphTexts: string[]
 ): string[] {
-  const blocks = [
-    ...paragraphTexts,
-    ...bodyText
-      .split(/(?<=[.!?])\s+/)
-      .map((item) => item.trim())
-      .filter((item) => item.length >= 60 && item.length <= 320)
-  ];
+  const cleanedParagraphs = paragraphTexts
+    .map(stripRepeatedBoilerplate)
+    .filter((item) => item.length >= 35 && item.length <= 1200);
 
-  return unique(blocks).slice(0, 16);
+  const sentenceBlocks = stripRepeatedBoilerplate(bodyText)
+    .split(/(?<=[.!?])\s+/)
+    .map((item) => item.trim())
+    .filter((item) => item.length >= 60 && item.length <= 320);
+
+  return unique([...cleanedParagraphs, ...sentenceBlocks]).slice(0, 16);
 }
 
 function extractLocationsFromTexts(values: string[]): string[] {
@@ -57,7 +86,7 @@ function extractLocationsFromTexts(values: string[]): string[] {
     /\b(Helsinki|Espoo|Vantaa|Kauniainen|Tampere|Turku|Oulu|Jyväskylä|Lahti|Kuopio|Klaukkala|Konala|Nurmijärvi|Uusimaa|Pirkanmaa|Suomi|Finland)\b/gi
   ) ?? [];
 
-  return unique(matches.map((item) => item.trim())).slice(0, 12);
+  return uniqueCaseInsensitive(matches).slice(0, 12);
 }
 
 function extractCandidateServices(input: {
@@ -70,7 +99,6 @@ function extractCandidateServices(input: {
   const candidates = [
     ...input.h2s,
     ...input.navItems,
-    input.h1,
     input.pageTitle,
     input.metaDescription
   ]
@@ -99,14 +127,15 @@ function extractClaims(contentBlocks: string[]): string[] {
       const lower = item.toLowerCase();
       return (
         item.length >= 30 &&
-        item.length <= 220 &&
+        item.length <= 240 &&
+        !/facebook|näytä kartalla|tietosuojaseloste/i.test(lower) &&
         (
-          /vahvuus|joustavuus|nopeus|laatu|kokemus|asiakas|palvelu|ammattil/i.test(lower) ||
-          /kannattaa|muistakaa|toimitamme|tarjoamme|varmistamme|teemme/i.test(lower)
+          /vahvuus|joustavuus|nopeus|laatu|kokemus|asiakas|palvelu|ammattil|takuu|testivoittaja|paras|edullinen/i.test(lower) ||
+          /kannattaa|muistakaa|toimitamme|tarjoamme|varmistamme|teemme|suosittelemme/i.test(lower)
         )
       );
     })
-  ).slice(0, 8);
+  ).slice(0, 10);
 }
 
 function detectPageRole(input: {
@@ -123,11 +152,10 @@ function detectPageRole(input: {
     input.sourceUrl,
     input.pageTitle,
     input.metaDescription,
-    input.h1,
     ...input.h2s,
     ...input.ctas,
     ...input.navItems,
-    ...input.contentBlocks.slice(0, 4)
+    ...input.contentBlocks.slice(0, 6)
   ]
     .join(" ")
     .toLowerCase();
@@ -137,26 +165,32 @@ function detectPageRole(input: {
   }
 
   if (
-    /yhteystiedot|contact|ota yhteyttä|toimipiste|facebook klaukkala|facebook konala/.test(text)
+    /jarruhuolto|iskunvaiment|pyöränlaaker|py�r�nlaaker|ilmastointi|rengas|talvirengas|kesärengas|kes�rengas|alumiinivanne|poistomyynti|autohuolto|autokorjaamo/.test(
+      text
+    )
   ) {
-    return "contact";
+    return "service";
   }
 
   if (
-    /ilmastointi|jarru|jousi|laakeri|rengas|vanne|autohuolto|autokorjaamo|poistomyynti/.test(text)
+    /palvelut|services|osaamisalue/.test(text)
   ) {
-    if (/palvelut|services|osaamisalue/.test(text)) {
-      return "service-category";
-    }
+    return "service-category";
+  }
 
-    return "service";
+  if (
+    /yhteystiedot,|ota yhteyttä|toimipiste|ristipellontie|metsäkyläntie|mets�kyl�ntie|avoinna|facebook klaukkala|facebook konala/.test(
+      text
+    )
+  ) {
+    return "contact";
   }
 
   if (/meistä|about|yritys|asiantuntija/.test(text)) {
     return "about";
   }
 
-  if (/kampanja|campaign|poistomyynti/.test(text)) {
+  if (/kampanja|campaign/.test(text)) {
     return "campaign";
   }
 
@@ -246,19 +280,21 @@ function buildDetectedImages(
 
 function buildContentReservoir(pages: RedesignBriefPage[]): RedesignBriefContentReservoir {
   return {
-    services: unique(pages.flatMap((page) => page.extractedServices)).slice(0, 24),
-    trustClaims: unique(
+    services: uniqueCaseInsensitive(pages.flatMap((page) => page.extractedServices)).slice(0, 24),
+    trustClaims: uniqueCaseInsensitive(
       pages.flatMap((page) => [...page.extractedClaims, ...page.keepSignals])
     ).slice(0, 24),
-    contactPoints: unique(
+    contactPoints: uniqueCaseInsensitive(
       pages.flatMap((page) => [
         ...page.extractedPhones,
         ...page.extractedEmails,
-        ...page.ctas
+        ...page.ctas.filter((cta) => !/facebook/i.test(cta))
       ])
     ).slice(0, 24),
-    locations: unique(pages.flatMap((page) => page.extractedLocations)).slice(0, 16),
-    ctas: unique(pages.flatMap((page) => page.ctas)).slice(0, 16),
+    locations: uniqueCaseInsensitive(pages.flatMap((page) => page.extractedLocations)).slice(0, 16),
+    ctas: uniqueCaseInsensitive(
+      pages.flatMap((page) => page.ctas.filter((cta) => !/facebook/i.test(cta)))
+    ).slice(0, 16),
     rawSnippets: unique(
       pages.flatMap((page) => page.contentBlocks.slice(0, 6))
     ).slice(0, 40)
@@ -323,14 +359,14 @@ export function buildRedesignBrief({
       h1: snapshot.h1,
       h2s: snapshot.h2s,
       navItems: snapshot.navItems,
-      ctas: snapshot.ctaTexts,
+      ctas: snapshot.ctaTexts.filter((item) => !/facebook/i.test(item)),
       summary: snapshot.usableTextSummary,
-      rawText: snapshot.bodyText,
+      rawText: stripRepeatedBoilerplate(snapshot.bodyText),
       contentBlocks,
       keepSignals: [
         ...snapshot.navItems.slice(0, 4),
         ...snapshot.h2s.slice(0, 3),
-        ...extractedClaims.slice(0, 2)
+        ...extractedClaims.slice(0, 3)
       ].filter(Boolean),
       improveSignals: analysis.auditIssues.map((issue) => issue.title),
       imageUrls: unique(compact([snapshot.ogImageUrl, ...snapshot.imageUrls])).slice(0, 16),
@@ -380,12 +416,6 @@ export function buildRedesignBrief({
     analyses.flatMap((analysis) => analysis.auditIssues.map((issue) => issue.title))
   );
 
-  const allSuggestions = unique(
-    analyses.flatMap((analysis) =>
-      analysis.suggestedSections.map((suggestion) => suggestion.name)
-    )
-  );
-
   return {
     site: {
       companyName,
@@ -419,9 +449,8 @@ export function buildRedesignBrief({
       coreOffer,
       secondaryOffers: contentReservoir.services.slice(0, 12),
       locations: contentReservoir.locations,
-      trustSignals: unique([
-        ...allSuggestions,
-        ...contentReservoir.trustClaims.slice(0, 8)
+      trustSignals: uniqueCaseInsensitive([
+        ...contentReservoir.trustClaims.slice(0, 12)
       ]).slice(0, 12),
       primaryCTA: contentReservoir.ctas[0] || "Ota yhteyttä"
     },

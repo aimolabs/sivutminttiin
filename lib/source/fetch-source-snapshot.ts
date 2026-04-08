@@ -34,9 +34,9 @@ function decodeHtml(value: string): string {
     .replace(/&Aring;/g, "Å")
     .replace(/&uuml;/g, "ü")
     .replace(/&Uuml;/g, "Ü")
+    .replace(/&nbsp;/g, " ")
     .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ");
+    .replace(/&gt;/g, ">");
 }
 
 function cleanText(value: string): string {
@@ -101,7 +101,8 @@ function extractLinkHref(
 function extractAll(html: string, regex: RegExp, maxItems = 8): string[] {
   const results: string[] = [];
   for (const match of html.matchAll(regex)) {
-    const value = cleanText(stripTags(match[1] || ""));
+    const raw = match[2] || match[1] || "";
+    const value = cleanText(stripTags(raw));
     if (!value) continue;
     if (results.includes(value)) continue;
     results.push(value);
@@ -143,33 +144,36 @@ function stripHtmlToText(html: string): string {
 
 function extractParagraphTexts(html: string, maxItems = 24): string[] {
   const blocks = extractAll(html, /<(p|li|td|div)[^>]*>([\s\S]*?)<\/\1>/gi, maxItems * 3);
-  const normalized = blocks
-    .map((item) => cleanText(item))
-    .filter((item) => item.length >= 30 && item.length <= 1200);
-
-  return [...new Set(normalized)].slice(0, maxItems);
+  return [...new Set(
+    blocks.filter((item) => item.length >= 30 && item.length <= 1400)
+  )].slice(0, maxItems);
 }
 
 function extractPhoneNumbers(text: string): string[] {
   const matches = text.match(/(?:\+358\s?|0)(?:[\s-]?\d){6,14}/g) ?? [];
-  const cleaned = matches
-    .map((item) => item.replace(/\s+/g, " ").trim())
-    .filter((item) => item.length >= 7 && item.length <= 20);
-
-  return [...new Set(cleaned)].slice(0, 12);
+  return [...new Set(
+    matches.map((item) => item.replace(/\s+/g, " ").trim())
+  )].slice(0, 12);
 }
 
 function extractEmailAddresses(text: string): string[] {
-  const matches = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) ?? [];
+  const normalized = text
+    .replace(/\(@\)/g, "@")
+    .replace(/\(at\)/gi, "@")
+    .replace(/\s*\[\s*at\s*\]\s*/gi, "@")
+    .replace(/\s*\[\s*dot\s*\]\s*/gi, ".")
+    .replace(/\s*\(\s*dot\s*\)\s*/gi, ".");
+
+  const matches = normalized.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) ?? [];
   return [...new Set(matches)].slice(0, 12);
 }
 
 function pickCtas(buttons: string[], links: string[]): string[] {
   const keywordRegex =
-    /(contact|quote|demo|book|call|talk|start|request|pricing|trial|tarjous|yhteys|ota yhteyttä|varaa|aloita|pyydä tarjous|facebook)/i;
+    /(contact|quote|demo|book|call|talk|start|request|pricing|trial|tarjous|yhteys|ota yhteyttä|varaa|aloita|pyydä tarjous)/i;
 
   const prioritized = [...buttons, ...links].filter((item) => keywordRegex.test(item));
-  const fallback = [...buttons, ...links];
+  const fallback = [...buttons, ...links].filter((item) => !/facebook/i.test(item));
 
   return [...new Set(prioritized.length > 0 ? prioritized : fallback)].slice(0, 8);
 }
@@ -178,6 +182,38 @@ function pickNavItems(links: string[]): string[] {
   return links
     .filter((item) => item.length >= 2 && item.length <= 40)
     .slice(0, 12);
+}
+
+function detectCharsetFromHtml(htmlHead: string): string {
+  const fromMetaCharset = htmlHead.match(/<meta[^>]+charset=["']?([a-zA-Z0-9._-]+)["']?/i)?.[1];
+  if (fromMetaCharset) return fromMetaCharset.toLowerCase();
+
+  const fromContentType = htmlHead.match(
+    /<meta[^>]+http-equiv=["']content-type["'][^>]+content=["'][^"']*charset=([a-zA-Z0-9._-]+)[^"']*["']/i
+  )?.[1];
+
+  if (fromContentType) return fromContentType.toLowerCase();
+
+  return "utf-8";
+}
+
+async function decodeResponseHtml(response: Response): Promise<string> {
+  const buffer = await response.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+
+  const utf8Text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+  const head = utf8Text.slice(0, 2500);
+  const detected = detectCharsetFromHtml(head);
+
+  if (detected.includes("iso-8859-1") || detected.includes("latin1") || detected.includes("windows-1252")) {
+    try {
+      return new TextDecoder("windows-1252", { fatal: false }).decode(bytes);
+    } catch {
+      return utf8Text;
+    }
+  }
+
+  return utf8Text;
 }
 
 function fallbackSnapshot(url: string): SourceSnapshot {
@@ -227,7 +263,7 @@ export async function fetchSourceSnapshot(url: string): Promise<SourceSnapshot> 
       return fallbackSnapshot(url);
     }
 
-    const html = await response.text();
+    const html = await decodeResponseHtml(response);
 
     const pageTitle = extractFirst(html, /<title[^>]*>([\s\S]*?)<\/title>/i);
     const metaDescription = extractMetaContent(html, ["description", "og:description"]);
