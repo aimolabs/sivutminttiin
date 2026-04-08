@@ -39,8 +39,6 @@ export default async function GeneratedPage({ searchParams }: Props) {
 
         <GenerateProjectForm
           defaultUrl=""
-          defaultIndustryId={industryId}
-          defaultStylePreset={stylePreset}
         />
       </div>
     );
