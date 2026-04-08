@@ -1,4 +1,4 @@
-import type { CompanyArchetypeId } from "../mock/company-archetypes";
+import type { CompanyArchetypeId } from "../briefs/archetype-id";
 import type {
   InferredBusinessModel,
   InferredIndustryId,
