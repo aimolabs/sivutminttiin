@@ -9,9 +9,12 @@ export type SourceSnapshot = {
   navItems: string[];
   ctaTexts: string[];
   bodyText: string;
+  paragraphTexts: string[];
   siteName: string;
   themeColor: string;
   ogImageUrl: string;
   iconUrl: string;
   imageUrls: string[];
+  phoneNumbers: string[];
+  emailAddresses: string[];
 };

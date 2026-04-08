@@ -7,9 +7,26 @@ export type RedesignBriefImage = {
   selected: boolean;
 };
 
+export type RedesignBriefContentReservoir = {
+  services: string[];
+  trustClaims: string[];
+  contactPoints: string[];
+  locations: string[];
+  ctas: string[];
+  rawSnippets: string[];
+};
+
 export type RedesignBriefPage = {
   sourceUrl: string;
-  pageRole: "home" | "services" | "about" | "contact" | "other";
+  pageRole:
+    | "home"
+    | "service"
+    | "service-category"
+    | "contact"
+    | "form"
+    | "about"
+    | "campaign"
+    | "other";
   pageTitle: string;
   metaDescription: string;
   h1: string;
@@ -17,9 +34,16 @@ export type RedesignBriefPage = {
   navItems: string[];
   ctas: string[];
   summary: string;
+  rawText: string;
+  contentBlocks: string[];
   keepSignals: string[];
   improveSignals: string[];
   imageUrls: string[];
+  extractedServices: string[];
+  extractedClaims: string[];
+  extractedLocations: string[];
+  extractedPhones: string[];
+  extractedEmails: string[];
 };
 
 export type RedesignBrief = {
@@ -60,6 +84,8 @@ export type RedesignBrief = {
     trustSignals: string[];
     primaryCTA?: string;
   };
+
+  contentReservoir: RedesignBriefContentReservoir;
 
   pages: RedesignBriefPage[];
 

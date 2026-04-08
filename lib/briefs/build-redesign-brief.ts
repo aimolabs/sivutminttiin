@@ -2,7 +2,12 @@ import type { SourceSnapshot } from "../source/source-snapshot";
 import { normalizeSourceSnapshot } from "../source/normalize-source-snapshot";
 import { analyzeSourceSnapshot } from "../source/analyze-source-snapshot";
 import { inferCompanySignals } from "../source/infer-company-signals";
-import type { RedesignBrief, RedesignBriefPage, RedesignBriefImage } from "./redesign-brief";
+import type {
+  RedesignBrief,
+  RedesignBriefPage,
+  RedesignBriefImage,
+  RedesignBriefContentReservoir
+} from "./redesign-brief";
 
 type BuildRedesignBriefInput = {
   primaryUrl: string;
@@ -31,62 +36,153 @@ function uniqueByUrl<T extends { url: string }>(values: T[]): T[] {
   return result;
 }
 
-function detectPageRole(input: {
-  url: string;
+function pickContentBlocks(
+  bodyText: string,
+  paragraphTexts: string[]
+): string[] {
+  const blocks = [
+    ...paragraphTexts,
+    ...bodyText
+      .split(/(?<=[.!?])\s+/)
+      .map((item) => item.trim())
+      .filter((item) => item.length >= 60 && item.length <= 320)
+  ];
+
+  return unique(blocks).slice(0, 16);
+}
+
+function extractLocationsFromTexts(values: string[]): string[] {
+  const text = values.join(" ");
+  const matches = text.match(
+    /\b(Helsinki|Espoo|Vantaa|Kauniainen|Tampere|Turku|Oulu|Jyväskylä|Lahti|Kuopio|Klaukkala|Konala|Nurmijärvi|Uusimaa|Pirkanmaa|Suomi|Finland)\b/gi
+  ) ?? [];
+
+  return unique(matches.map((item) => item.trim())).slice(0, 12);
+}
+
+function extractCandidateServices(input: {
   pageTitle: string;
+  metaDescription: string;
   h1: string;
+  h2s: string[];
   navItems: string[];
+}): string[] {
+  const candidates = [
+    ...input.h2s,
+    ...input.navItems,
+    input.h1,
+    input.pageTitle,
+    input.metaDescription
+  ]
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return unique(
+    candidates.filter((item) => {
+      const lower = item.toLowerCase();
+      if (item.length < 3 || item.length > 90) return false;
+      if (/^(yhteystiedot|contact|etusivu|home)$/i.test(item)) return false;
+      if (/facebook/i.test(item)) return false;
+      if (/tarjouspyyntölomake/i.test(lower)) return false;
+      return (
+        /huolto|korjaus|jarru|jousi|laakeri|ilmastointi|rengas|vanne|poistomyynti|autokorjaamo|autohuolto|palvelu/i.test(
+          lower
+        ) || item.split(" ").length <= 4
+      );
+    })
+  ).slice(0, 10);
+}
+
+function extractClaims(contentBlocks: string[]): string[] {
+  return unique(
+    contentBlocks.filter((item) => {
+      const lower = item.toLowerCase();
+      return (
+        item.length >= 30 &&
+        item.length <= 220 &&
+        (
+          /vahvuus|joustavuus|nopeus|laatu|kokemus|asiakas|palvelu|ammattil/i.test(lower) ||
+          /kannattaa|muistakaa|toimitamme|tarjoamme|varmistamme|teemme/i.test(lower)
+        )
+      );
+    })
+  ).slice(0, 8);
+}
+
+function detectPageRole(input: {
+  sourceUrl: string;
+  pageTitle: string;
+  metaDescription: string;
+  h1: string;
+  h2s: string[];
+  ctas: string[];
+  navItems: string[];
+  contentBlocks: string[];
 }): RedesignBriefPage["pageRole"] {
   const text = [
-    input.url,
+    input.sourceUrl,
     input.pageTitle,
+    input.metaDescription,
     input.h1,
-    ...input.navItems
+    ...input.h2s,
+    ...input.ctas,
+    ...input.navItems,
+    ...input.contentBlocks.slice(0, 4)
   ]
     .join(" ")
     .toLowerCase();
 
-  if (/yhteys|contact|ota-yhteytt|booking|varaa|ajanvaraus/.test(text)) {
+  if (/lomake\.html|tarjouspyyntölomake|lähetä tarjouspyyntö|tarjouspyyntö/.test(text)) {
+    return "form";
+  }
+
+  if (
+    /yhteystiedot|contact|ota yhteyttä|toimipiste|facebook klaukkala|facebook konala/.test(text)
+  ) {
     return "contact";
   }
 
-  if (/palvelu|services|service|huolto|korjaus|remontti|osaamisalue/.test(text)) {
-    return "services";
+  if (
+    /ilmastointi|jarru|jousi|laakeri|rengas|vanne|autohuolto|autokorjaamo|poistomyynti/.test(text)
+  ) {
+    if (/palvelut|services|osaamisalue/.test(text)) {
+      return "service-category";
+    }
+
+    return "service";
   }
 
-  if (/meistä|about|yritys|company|asiantuntija/.test(text)) {
+  if (/meistä|about|yritys|asiantuntija/.test(text)) {
     return "about";
   }
 
-  if (/etusivu|home/.test(text)) {
-    return "home";
+  if (/kampanja|campaign|poistomyynti/.test(text)) {
+    return "campaign";
   }
 
   return "other";
 }
 
-function pickCoreOffer(
-  primaryH1: string,
-  primaryH2s: string[]
-): string {
-  if (primaryH1 && !/yhteystiedot|contact/i.test(primaryH1)) {
-    return primaryH1;
-  }
+function pickCoreOffer(primaryPage: RedesignBriefPage): string {
+  const serviceCandidate =
+    primaryPage.extractedServices[0] ||
+    primaryPage.h2s.find((item) => !/yhteystiedot|contact/i.test(item)) ||
+    primaryPage.metaDescription ||
+    primaryPage.h1;
 
-  const firstGoodH2 = primaryH2s.find((item) => !/yhteystiedot|contact/i.test(item));
-  if (firstGoodH2) return firstGoodH2;
-
-  return primaryH1 || "Pääpalvelu";
+  return serviceCandidate || "Pääpalvelu";
 }
 
 function pickRecommendedPages(pages: RedesignBriefPage[]): string[] {
   const roles = new Set(pages.map((page) => page.pageRole));
   const recommended: string[] = ["Etusivu"];
 
-  if (roles.has("services")) recommended.push("Palvelut");
+  if (roles.has("service") || roles.has("service-category")) recommended.push("Palvelut");
   if (roles.has("about")) recommended.push("Yritys");
   if (roles.has("contact")) recommended.push("Yhteystiedot");
-  if (!roles.has("services")) recommended.push("Palvelut");
+  if (roles.has("form")) recommended.push("Tarjouspyyntö");
+
+  if (!roles.has("service") && !roles.has("service-category")) recommended.push("Palvelut");
   if (!roles.has("contact")) recommended.push("Yhteystiedot");
 
   return unique(recommended).slice(0, 6);
@@ -110,13 +206,22 @@ function buildDetectedImages(
       });
     }
 
-    for (const imageUrl of snapshot.imageUrls.slice(0, 8)) {
+    for (const imageUrl of snapshot.imageUrls.slice(0, 12)) {
+      const lower = imageUrl.toLowerCase();
+
       items.push({
         id: `img-${items.length + 1}`,
         url: imageUrl,
         sourceUrl: snapshot.sourceUrl,
         label: snapshot.sourceUrl === primaryUrl ? "Primary page image" : "Detected page image",
-        kind: snapshot.sourceUrl === primaryUrl ? "gallery" : "other",
+        kind:
+          /logo|icon|favicon/.test(lower)
+            ? "logo"
+            : /screen|screenshot/.test(lower)
+              ? "other"
+              : snapshot.sourceUrl === primaryUrl
+                ? "gallery"
+                : "service",
         selected: false
       });
     }
@@ -133,10 +238,31 @@ function buildDetectedImages(
     }
   }
 
-  return uniqueByUrl(items).slice(0, 60).map((item, index) => ({
+  return uniqueByUrl(items).slice(0, 80).map((item, index) => ({
     ...item,
     id: `img-${index + 1}`
   }));
+}
+
+function buildContentReservoir(pages: RedesignBriefPage[]): RedesignBriefContentReservoir {
+  return {
+    services: unique(pages.flatMap((page) => page.extractedServices)).slice(0, 24),
+    trustClaims: unique(
+      pages.flatMap((page) => [...page.extractedClaims, ...page.keepSignals])
+    ).slice(0, 24),
+    contactPoints: unique(
+      pages.flatMap((page) => [
+        ...page.extractedPhones,
+        ...page.extractedEmails,
+        ...page.ctas
+      ])
+    ).slice(0, 24),
+    locations: unique(pages.flatMap((page) => page.extractedLocations)).slice(0, 16),
+    ctas: unique(pages.flatMap((page) => page.ctas)).slice(0, 16),
+    rawSnippets: unique(
+      pages.flatMap((page) => page.contentBlocks.slice(0, 6))
+    ).slice(0, 40)
+  };
 }
 
 export function buildRedesignBrief({
@@ -153,23 +279,45 @@ export function buildRedesignBrief({
     analyzeSourceSnapshot(snapshot, snapshot.companyNameCandidate)
   );
 
-  const primarySignals = inferCompanySignals(primary);
-
   const pages: RedesignBriefPage[] = normalized.map((snapshot, index) => {
     const analysis = analyses[index];
-    const pageRole =
+    const contentBlocks = pickContentBlocks(snapshot.bodyText, snapshot.paragraphTexts);
+
+    const preliminaryRole =
       snapshot.sourceUrl === primaryUrl
         ? "home"
         : detectPageRole({
-            url: snapshot.sourceUrl,
+            sourceUrl: snapshot.sourceUrl,
             pageTitle: snapshot.pageTitle,
+            metaDescription: snapshot.metaDescription,
             h1: snapshot.h1,
-            navItems: snapshot.navItems
+            h2s: snapshot.h2s,
+            ctas: snapshot.ctaTexts,
+            navItems: snapshot.navItems,
+            contentBlocks
           });
+
+    const extractedServices = extractCandidateServices({
+      pageTitle: snapshot.pageTitle,
+      metaDescription: snapshot.metaDescription,
+      h1: snapshot.h1,
+      h2s: snapshot.h2s,
+      navItems: snapshot.navItems
+    });
+
+    const extractedLocations = extractLocationsFromTexts([
+      snapshot.pageTitle,
+      snapshot.metaDescription,
+      snapshot.h1,
+      ...snapshot.h2s,
+      ...contentBlocks
+    ]);
+
+    const extractedClaims = extractClaims(contentBlocks);
 
     return {
       sourceUrl: snapshot.sourceUrl,
-      pageRole,
+      pageRole: preliminaryRole,
       pageTitle: snapshot.pageTitle,
       metaDescription: snapshot.metaDescription,
       h1: snapshot.h1,
@@ -177,37 +325,37 @@ export function buildRedesignBrief({
       navItems: snapshot.navItems,
       ctas: snapshot.ctaTexts,
       summary: snapshot.usableTextSummary,
+      rawText: snapshot.bodyText,
+      contentBlocks,
       keepSignals: [
-        ...snapshot.navItems.slice(0, 3),
-        ...snapshot.h2s.slice(0, 2)
+        ...snapshot.navItems.slice(0, 4),
+        ...snapshot.h2s.slice(0, 3),
+        ...extractedClaims.slice(0, 2)
       ].filter(Boolean),
       improveSignals: analysis.auditIssues.map((issue) => issue.title),
-      imageUrls: unique(
-        compact([snapshot.ogImageUrl, ...snapshot.imageUrls])
-      ).slice(0, 12)
+      imageUrls: unique(compact([snapshot.ogImageUrl, ...snapshot.imageUrls])).slice(0, 16),
+      extractedServices,
+      extractedClaims,
+      extractedLocations,
+      extractedPhones: snapshot.phoneNumbers,
+      extractedEmails: snapshot.emailAddresses
     };
   });
 
+  const primaryPage =
+    pages.find((page) => page.sourceUrl === primaryUrl) ??
+    pages[0];
+
+  const primarySignals = inferCompanySignals(primary);
   const companyName = primary.companyNameCandidate;
   const domain = primary.domain;
-  const coreOffer = pickCoreOffer(primary.h1, primary.h2s);
-
-  const allH2s = unique(
-    normalized.flatMap((snapshot) => snapshot.h2s)
-  );
-
-  const allCtas = unique(
-    normalized.flatMap((snapshot) => snapshot.ctaTexts)
-  );
-
-  const allNavItems = unique(
-    normalized.flatMap((snapshot) => snapshot.navItems)
-  );
+  const contentReservoir = buildContentReservoir(pages);
+  const coreOffer = pickCoreOffer(primaryPage);
 
   const heroImageCandidates = unique(
     compact([
       primary.ogImageUrl,
-      ...primary.imageUrls.slice(0, 6),
+      ...primary.imageUrls.slice(0, 8),
       ...normalized.flatMap((snapshot) => compact([snapshot.ogImageUrl]))
     ])
   );
@@ -224,7 +372,7 @@ export function buildRedesignBrief({
         purposeHint: snapshot.sourceUrl === primaryUrl ? "primary-page-image" : "page-image"
       }))
     )
-  ).slice(0, 60);
+  ).slice(0, 80);
 
   const detectedImages = buildDetectedImages(normalized, primaryUrl);
 
@@ -265,13 +413,20 @@ export function buildRedesignBrief({
 
     business: {
       industry: primarySignals.industryId,
-      audience: undefined,
+      audience: contentReservoir.locations.length
+        ? `Palvelee alueilla: ${contentReservoir.locations.join(", ")}`
+        : undefined,
       coreOffer,
-      secondaryOffers: allH2s.slice(0, 8),
-      locations: [],
-      trustSignals: allSuggestions.slice(0, 6),
-      primaryCTA: allCtas[0] || "Ota yhteyttä"
+      secondaryOffers: contentReservoir.services.slice(0, 12),
+      locations: contentReservoir.locations,
+      trustSignals: unique([
+        ...allSuggestions,
+        ...contentReservoir.trustClaims.slice(0, 8)
+      ]).slice(0, 12),
+      primaryCTA: contentReservoir.ctas[0] || "Ota yhteyttä"
     },
+
+    contentReservoir,
 
     pages,
 
@@ -287,11 +442,12 @@ export function buildRedesignBrief({
         `Primary URL toimii etusivun lähteenä: ${primaryUrl}`,
         "Säilytä liiketoiminnan todellinen sisältö, älä keksi uusia palveluita ilman signaaleja.",
         "Käytä vain selected=true merkittyjä kuvia, logoja ja assetteja generation pohjana.",
+        "Käytä pages[].rawText, pages[].contentBlocks ja contentReservoir-osiota aktiivisena lähdesisältönä.",
         "Korjaa erityisesti nämä ongelmat:",
-        ...allWeaknesses.slice(0, 6),
+        ...allWeaknesses.slice(0, 8),
         "Hyödynnä näitä vahvuuksia ja säilytettäviä signaaleja:",
-        ...allSuggestions.slice(0, 6),
-        ...allNavItems.slice(0, 6)
+        ...contentReservoir.services.slice(0, 8),
+        ...contentReservoir.trustClaims.slice(0, 8)
       ]
     }
   };
