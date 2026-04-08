@@ -1,5 +1,14 @@
-import type { AuditIssue, SuggestedSection } from "../mock/projects";
 import type { NormalizedSourceSnapshot } from "./normalize-source-snapshot";
+
+export type AuditIssue = {
+  title: string;
+  detail: string;
+};
+
+export type SuggestedSection = {
+  name: string;
+  reason: string;
+};
 
 export type SourceAnalysis = {
   auditIssues: AuditIssue[];
@@ -33,7 +42,7 @@ export function analyzeSourceSnapshot(
     pushIssue(
       auditIssues,
       "Lähdesivun signaaleja ei saatu haettua luotettavasti",
-      `${companyName} konsepti jouduttiin rakentamaan fallback-logiikalla. Tämä heikentää analyysin tarkkuutta ja lisää geneerisen tulkinnan riskiä.`
+      `${companyName} brief jouduttiin rakentamaan fallback-logiikalla. Tämä heikentää analyysin tarkkuutta ja lisää geneerisen tulkinnan riskiä.`
     );
 
     pushSuggestion(
@@ -109,7 +118,7 @@ export function analyzeSourceSnapshot(
   if (snapshot.ctaTexts.length <= 1) {
     pushSuggestion(
       suggestedSections,
-      "Vahva CTA-osa useampaan kohtaan sivua",
+      "Vahva CTA useampaan kohtaan sivua",
       "Kun nykyiset CTA-signaalit jäävät heikoiksi, redesignissa yhteydenotto tai tarjouspyyntö pitää nostaa näkyviin useammin ja selkeämmin."
     );
   }
