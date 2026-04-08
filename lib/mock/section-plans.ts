@@ -1,5 +1,4 @@
 import type { RedesignSection } from "./projects";
-import type { StylePresetId } from "./style-presets";
 
 type SectionMap = {
   hero: Extract<RedesignSection, { type: "hero" }>;
@@ -10,7 +9,7 @@ type SectionMap = {
 };
 
 export function buildSectionPlan(
-  stylePreset: StylePresetId,
+  stylePreset: string,
   sections: SectionMap
 ): RedesignSection[] {
   switch (stylePreset) {

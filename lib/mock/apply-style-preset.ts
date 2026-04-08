@@ -1,4 +1,3 @@
-import type { StylePresetId } from "./style-presets";
 
 export type PresetAdjustedContent = {
   heroHeadline: string;
@@ -11,7 +10,7 @@ export type PresetAdjustedContent = {
 };
 
 type ApplyStylePresetInput = {
-  stylePreset: StylePresetId;
+  stylePreset: string;
   companyName: string;
   industryLabel: string;
   baseHeadline: string;
