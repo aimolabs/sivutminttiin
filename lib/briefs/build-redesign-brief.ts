@@ -28,7 +28,7 @@ export function buildRedesignBrief(
 
     business: {
       industry: signals.industryId,
-      audience: signals.audienceType,
+      audience: undefined,
       coreOffer: snapshot.h1,
       secondaryOffers: snapshot.h2s,
       locations: []
