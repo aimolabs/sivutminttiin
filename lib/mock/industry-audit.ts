@@ -1,4 +1,4 @@
-import type { AuditIssue, SuggestedSection } from "./projects";
+import type { AuditIssue, SuggestedSection } from "../source/analyze-source-snapshot";
 
 type IndustryAudit = {
   auditIssues: AuditIssue[];
